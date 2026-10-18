@@ -25,7 +25,7 @@ Built with modern Angular architecture, WASLA combines responsive design, reusab
   - Email validation and password matching.
 
 
-- **Home Feed **
+- **Home Feed**
   - Three-column desktop layout.
   - Interactive "Who to Follow" section.
   - Feed filters: All, Following, and Me.
