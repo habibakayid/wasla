@@ -1,3 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
 
-@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+
+@theme {
+  --color-brand: #5b1230;
+  --color-brand-strong: #44091f;
+  --color-rose: #c2455f;
+  --color-gold: #e0a21a;
+  --color-sand: #e3b77c;
+  --color-cream: #fbf3ea;
+  --font-sans: "Inter", "Cairo", sans-serif;
+}
+
