@@ -1,0 +1,101 @@
+<div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl overflow-hidden">
+
+  
+  <div class="h-28 bg-gradient-to-r from-brand via-rose to-gold">
+    <img *ngIf="auth.user?.cover" [src]="auth.user?.cover" alt="" class="w-full h-full object-cover" />
+  </div>
+
+  <div *ngIf="auth.user" class="px-5 pb-4">
+    <div class="flex items-end gap-4 -mt-10">
+      <img [src]="auth.user.photo" alt=""
+           class="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-neutral-800 bg-brand" />
+      <div class="pb-1 min-w-0">
+        <h1 class="text-lg font-extrabold truncate">{{ auth.user.name }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">&#64;{{ auth.user.username }}</p>
+      </div>
+      <a routerLink="/settings" class="ms-auto mb-1 text-sm text-brand dark:text-rose hover:underline"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+
+   
+    <div class="flex gap-6 mt-4 text-sm">
+      <span><b>{{ myPosts.length }}</b> Posts</span>
+      <span><b>{{ profile?.followersCount || 0 }}</b> Followers</span>
+      <span><b>{{ profile?.followingCount || 0 }}</b> Following</span>
+    </div>
+  </div>
+
+ 
+  <div class="flex border-t border-b border-gray-200 dark:border-neutral-700 text-sm font-semibold">
+    <button type="button" (click)="openTab('analytics')" class="flex-1 py-3"
+            [ngClass]="activeTab === 'analytics' ? 'text-brand dark:text-rose border-b-2 border-brand dark:border-rose' : 'text-gray-500'">
+      <i class="fa-solid fa-square-poll-vertical"></i> Analytics
+    </button>
+    <button type="button" (click)="openTab('posts')" class="flex-1 py-3"
+            [ngClass]="activeTab === 'posts' ? 'text-brand dark:text-rose border-b-2 border-brand dark:border-rose' : 'text-gray-500'">
+      <i class="fa-solid fa-image"></i> My Posts ({{ myPosts.length }})
+    </button>
+    <button type="button" (click)="openTab('saved')" class="flex-1 py-3"
+            [ngClass]="activeTab === 'saved' ? 'text-brand dark:text-rose border-b-2 border-brand dark:border-rose' : 'text-gray-500'">
+      <i class="fa-solid fa-bookmark"></i> Saved ({{ savedPosts.length }})
+    </button>
+  </div>
+
+  
+  <section [class.hidden]="activeTab !== 'analytics'" class="p-4">
+    <div class="bg-neutral-900 text-white rounded-xl p-4 sm:p-6">
+      <h2 class="font-extrabold mb-4">Engagement Analytics</h2>
+
+      
+      <div class="grid grid-cols-3 gap-3">
+        <div *ngFor="let c of cards" class="flex flex-col items-center text-center rounded-xl p-3 bg-neutral-800 border border-neutral-700">
+          <svg class="w-16 h-16" viewBox="0 0 70 70">
+            <circle cx="35" cy="35" r="28" fill="none" stroke="#332b2f" stroke-width="6" />
+            <circle cx="35" cy="35" r="28" fill="none" stroke-width="6" stroke-linecap="round"
+                    [attr.stroke]="c.color"
+                    [attr.stroke-dasharray]="ringDash(c.pct)"
+                    transform="rotate(-90 35 35)" />
+            <text x="35" y="39" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">{{ c.value }}</text>
+          </svg>
+          <p class="mt-2 text-sm font-extrabold">{{ c.name }}</p>
+          <p class="text-xs" [ngClass]="c.text">{{ c.pct }}% of interaction</p>
+        </div>
+      </div>
+
+
+      <div class="mt-3 flex items-center justify-between rounded-xl p-4 bg-neutral-800 border border-yellow-400">
+        <p class="font-extrabold text-yellow-300"><i class="fa-solid fa-bookmark"></i> {{ savedPosts.length }} Saved posts</p>
+        <p class="text-xs text-yellow-200">posts you bookmarked</p>
+      </div>
+
+     
+      <div class="mt-4 bg-neutral-800 border border-neutral-700 rounded-xl p-4">
+        <p class="text-xs font-bold text-stone-400 mb-2">Weekly Activity (by post date)</p>
+        <div class="h-64">
+          <canvas #weekChart></canvas>
+        </div>
+      </div>
+
+      <p *ngIf="!loadingPosts && myPosts.length === 0" class="text-center text-sm text-stone-400 mt-4">
+        Publish your first post to see analytics here.
+      </p>
+    </div>
+  </section>
+
+  
+  <section *ngIf="activeTab === 'posts'" class="p-4 space-y-4 bg-cream dark:bg-neutral-900">
+    <p *ngIf="loadingPosts" class="text-sm text-gray-500">Loading...</p>
+    <p *ngIf="!loadingPosts && myPosts.length === 0" class="text-center text-sm text-gray-500 py-8">
+      You haven't posted anything yet.
+    </p>
+    <app-post-card *ngFor="let post of myPosts" [post]="post" (deleted)="removePost($event)" />
+  </section>
+
+  
+  <section *ngIf="activeTab === 'saved'" class="p-4 space-y-4 bg-cream dark:bg-neutral-900">
+    <p *ngIf="loadingSaved" class="text-sm text-gray-500">Loading...</p>
+    <p *ngIf="!loadingSaved && savedPosts.length === 0" class="text-center text-sm text-gray-500 py-8">
+      <i class="fa-solid fa-bookmark"></i> No saved posts yet. Tap the bookmark on any post to keep it here.
+    </p>
+    <app-post-card *ngFor="let post of savedPosts" [post]="post" (deleted)="removeSaved($event)" (bookmarkChanged)="onSavedChanged()" />
+  </section>
+</div>

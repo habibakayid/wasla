@@ -1,0 +1,126 @@
+<h1 class="text-xl font-extrabold mb-4">Settings</h1>
+
+<div class="space-y-4">
+  <section
+    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-5"
+  >
+    <h2 class="font-semibold mb-3">Appearance</h2>
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-gray-600 dark:text-gray-300">Dark mode</p>
+      <button
+        type="button"
+        (click)="toggleTheme()"
+        class="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-300 dark:border-neutral-600"
+      >
+        @if (theme.theme === 'dark') {
+          <i class="fa-solid fa-sun"></i>
+          Switch to light
+        } @else {
+          <i class="fa-solid fa-moon"></i>
+          Switch to dark
+        }
+      </button>
+    </div>
+  </section>
+
+  <section
+    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-5"
+  >
+    <h2 class="font-semibold mb-3">Profile photo</h2>
+    <div class="flex items-center gap-4">
+      <img
+        *ngIf="auth.user"
+        [src]="auth.user.photo"
+        alt=""
+        class="w-16 h-16 rounded-full object-cover bg-gray-200"
+      />
+      <label
+        class="text-sm font-medium px-4 py-2 rounded-lg cursor-pointer text-white bg-brand hover:bg-brand-strong"
+        [class.opacity-50]="uploading"
+      >
+        {{ uploading ? 'Uploading...' : 'Change photo' }}
+        <input
+          type="file"
+          accept="image/*"
+          class="hidden"
+          [disabled]="uploading"
+          (change)="onPhotoChange($event)"
+        />
+      </label>
+    </div>
+  </section>
+
+  <section
+    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-5"
+  >
+    <h2 class="font-semibold mb-3">Change password</h2>
+
+    <form
+      [formGroup]="passwordForm"
+      (ngSubmit)="changePassword()"
+      novalidate
+      class="space-y-4 max-w-md"
+    >
+      <div>
+        <label for="password" class="block mb-1.5 text-sm font-medium">Current password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          autocomplete="current-password"
+          class="block w-full p-2.5 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"
+        />
+        <p *ngIf="hasError('password')" class="mt-1 text-xs text-red-600">
+          Current password is required.
+        </p>
+      </div>
+
+      <div>
+        <label for="newPassword" class="block mb-1.5 text-sm font-medium">New password</label>
+        <input
+          type="password"
+          id="newPassword"
+          formControlName="newPassword"
+          autocomplete="new-password"
+          class="block w-full p-2.5 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"
+        />
+        <p *ngIf="hasError('newPassword')" class="mt-1 text-xs text-red-600">
+          At least 8 characters.
+        </p>
+      </div>
+
+      <div>
+        <label for="confirm" class="block mb-1.5 text-sm font-medium">Confirm new password</label>
+        <input
+          type="password"
+          id="confirm"
+          formControlName="confirm"
+          autocomplete="new-password"
+          class="block w-full p-2.5 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"
+        />
+        <p *ngIf="passwordsDiffer" class="mt-1 text-xs text-red-600">Passwords do not match.</p>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="savingPassword"
+        class="text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-rose/40 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50"
+      >
+        {{ savingPassword ? 'Saving...' : 'Update password' }}
+      </button>
+    </form>
+  </section>
+
+  <section
+    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-5"
+  >
+    <h2 class="font-semibold mb-3">Session</h2>
+    <button
+      type="button"
+      (click)="logout()"
+      class="text-sm font-medium px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-neutral-700"
+    >
+      Log out
+    </button>
+  </section>
+</div>

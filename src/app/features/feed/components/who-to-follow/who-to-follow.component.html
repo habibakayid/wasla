@@ -1,0 +1,18 @@
+<div *ngIf="users.length > 0"
+     class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4 mb-4">
+  <h2 class="font-semibold mb-3">Who to follow</h2>
+
+  <div class="flex gap-4 overflow-x-auto pb-1">
+    <button *ngFor="let user of users" type="button" (click)="follow(user)"
+            class="flex flex-col items-center shrink-0 w-16">
+      <span class="relative">
+        <img [src]="user.photo" alt=""
+             class="w-14 h-14 rounded-full object-cover border-2"
+             [ngClass]="user.followed ? 'border-green-500' : 'border-rose'" />
+        <span *ngIf="user.followed"
+              class="absolute -bottom-1 -end-1 w-5 h-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">✓</span>
+      </span>
+      <span class="mt-1 text-xs truncate w-full">{{ firstName(user.name) }}</span>
+    </button>
+  </div>
+</div>

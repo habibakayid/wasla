@@ -1,0 +1,25 @@
+<div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+  <h2 class="font-semibold mb-3">Suggestions</h2>
+
+  <p *ngIf="loading" class="text-sm text-gray-500">Loading...</p>
+  <p *ngIf="!loading && users.length === 0" class="text-sm text-gray-500">No suggestions right now.</p>
+
+  <ul class="space-y-3">
+    <li *ngFor="let user of users" class="flex items-center gap-3">
+      <img [src]="user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium truncate">{{ user.name }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">&#64;{{ user.username }}</p>
+        
+        <p *ngIf="user.followersCount !== undefined" class="text-xs text-gray-400">{{ user.followersCount }} followers</p>
+      </div>
+      <button type="button" (click)="follow(user)"
+              class="text-xs font-medium px-3 py-1.5 rounded-lg border"
+              [ngClass]="user.followed
+                ? 'border-gray-300 text-gray-700 dark:text-gray-200 dark:border-neutral-600'
+                : 'bg-brand text-white border-transparent hover:bg-brand-strong'">
+        {{ user.followed ? 'Following' : 'Follow' }}
+      </button>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,20 @@
+<h1 class="text-xl font-extrabold mb-4">Explore</h1>
+
+<p *ngIf="loading && posts.length === 0" class="text-sm text-gray-500">Loading...</p>
+
+<div *ngIf="!loading && posts.length === 0"
+     class="text-center bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-10">
+  <p class="text-3xl mb-2"><i class="fa-solid fa-magnifying-glass"></i></p>
+  <p class="font-semibold">Nothing to explore yet</p>
+</div>
+
+<div class="space-y-4">
+  <app-post-card *ngFor="let post of posts" [post]="post" (deleted)="removePost($event)" />
+</div>
+
+<div *ngIf="hasMore && posts.length > 0" class="text-center mt-6">
+  <button type="button" (click)="loadMore()" [disabled]="loading"
+          class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-50">
+    {{ loading ? 'Loading...' : 'Load more' }}
+  </button>
+</div>

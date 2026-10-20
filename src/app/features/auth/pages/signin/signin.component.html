@@ -1,0 +1,36 @@
+<h1 class="text-2xl font-extrabold text-center">Welcome back</h1>
+<p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Sign in to continue to Wasla</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+  <div class="mb-4">
+    <label for="email" class="block mb-1.5 text-sm font-medium">Email</label>
+    <input type="email" id="email" formControlName="email" autocomplete="email"
+           class="block w-full p-2.5 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"
+           placeholder="name@example.com" />
+    <p *ngIf="hasError('email')" class="mt-1 text-xs text-red-600">Enter a valid email address.</p>
+  </div>
+
+  <div class="mb-6">
+    <label for="password" class="block mb-1.5 text-sm font-medium">Password</label>
+    <div class="relative">
+      <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" autocomplete="current-password"
+             class="block w-full p-2.5 pe-16 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand" />
+      <button type="button" (click)="showPassword = !showPassword"
+              class="absolute inset-y-0 end-3 text-xs font-medium text-brand dark:text-rose">
+        {{ showPassword ? 'Hide' : 'Show' }}
+      </button>
+    </div>
+    <p *ngIf="hasError('password')" class="mt-1 text-xs text-red-600">Password is required.</p>
+  </div>
+
+  <button type="submit" [disabled]="loading"
+          class="w-full text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-rose/40 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50">
+    {{ loading ? 'Signing in...' : 'Sign in' }}
+  </button>
+</form>
+
+<p class="mt-5 text-sm text-center text-gray-500 dark:text-gray-400">
+  New here?
+  <a routerLink="/auth/signup" class="font-medium text-brand dark:text-rose hover:underline">Create an account</a>
+</p>

@@ -1,0 +1,114 @@
+<h1 class="auth-title">Create account</h1>
+<p class="auth-subtitle">Join Wasla and connect with people.</p>
+
+<div class="steps">
+  <span class="steps__bar steps__bar--done"></span>
+  <span class="steps__bar" [class.steps__bar--done]="step === 2"></span>
+  <span class="steps__label">Step {{ step }} of 2</span>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+
+  <div *ngIf="step === 1">
+    <div class="field">
+      <label class="field__label" for="name">Full name</label>
+      <input id="name" class="field__input" type="text" formControlName="name" autocomplete="name"
+             [class.is-invalid]="hasError('name')" />
+      <span *ngIf="hasError('name')" class="field__error">
+        {{ form.controls.name.hasError('required') ? 'Full name is required.' : 'Use at least 3 characters.' }}
+      </span>
+    </div>
+
+    <div class="field">
+      <div class="field__row">
+        <label class="field__label" for="email">Email</label>
+        <span *ngIf="form.controls.email.valid && form.controls.email.dirty" class="field__status">✓ valid email</span>
+      </div>
+      <input id="email" class="field__input" type="email" formControlName="email"
+             autocomplete="email" inputmode="email" [class.is-invalid]="hasError('email')" />
+      <span *ngIf="hasError('email')" class="field__error">
+        {{ form.controls.email.hasError('required') ? 'Email is required.' : 'Enter a valid email address.' }}
+      </span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="password">Password</label>
+      <div class="field__control">
+        <input id="password" class="field__input field__input--has-toggle"
+               [type]="showPassword ? 'text' : 'password'" formControlName="password"
+               autocomplete="new-password" [class.is-invalid]="hasError('password')" />
+        <button type="button" class="field__toggle" (click)="showPassword = !showPassword">
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+      <span *ngIf="hasError('password')" class="field__error">
+        {{ form.controls.password.hasError('required') ? 'Password is required.' : 'Use at least 8 characters.' }}
+      </span>
+    </div>
+
+    <div class="field">
+      <div class="field__row">
+        <label class="field__label" for="rePassword">Confirm password</label>
+        <span *ngIf="form.controls.rePassword.value && !passwordsDiffer" class="field__status">✓ passwords match</span>
+      </div>
+      <input id="rePassword" class="field__input" [type]="showPassword ? 'text' : 'password'"
+             formControlName="rePassword" autocomplete="new-password"
+             [class.is-invalid]="form.controls.rePassword.touched && passwordsDiffer" />
+      <span *ngIf="form.controls.rePassword.touched && passwordsDiffer" class="field__error">Passwords do not match.</span>
+    </div>
+
+    <button class="btn btn--primary" type="button" (click)="next()">Continue</button>
+  </div>
+
+  
+  <div *ngIf="step === 2">
+    <div class="field">
+      <label class="field__label" for="username">Username</label>
+      <input id="username" class="field__input" type="text" formControlName="username"
+             autocomplete="username" autocapitalize="none" [class.is-invalid]="hasError('username')" />
+      <span *ngIf="hasError('username')" class="field__error">
+        {{ form.controls.username.hasError('required') ? 'Username is required.'
+           : form.controls.username.hasError('pattern') ? 'Username cannot contain spaces.'
+           : 'Use at least 3 characters.' }}
+      </span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="dateOfBirth">Date of birth</label>
+      <input id="dateOfBirth" class="field__input" type="date" formControlName="dateOfBirth"
+             autocomplete="bday" [max]="maxDate" [class.is-invalid]="hasError('dateOfBirth')" />
+      <span *ngIf="hasError('dateOfBirth')" class="field__error">
+        {{ form.controls.dateOfBirth.hasError('required') ? 'Date of birth is required.' : 'You must be at least 13 years old.' }}
+      </span>
+    </div>
+
+    <fieldset class="choice">
+      <legend class="field__label">Gender</legend>
+      <div class="choice__options">
+        <label class="choice__option">
+          <input type="radio" formControlName="gender" value="male" />
+          <span>Male</span>
+        </label>
+        <label class="choice__option">
+          <input type="radio" formControlName="gender" value="female" />
+          <span>Female</span>
+        </label>
+      </div>
+      <span *ngIf="hasError('gender')" class="field__error">Please choose one.</span>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn btn--ghost" type="button" (click)="back()" [disabled]="loading">Back</button>
+      <button class="btn btn--primary" type="submit" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        Create account
+      </button>
+    </div>
+  </div>
+</form>
+
+<p class="auth-switch">
+  Already have an account?
+  <a class="link" routerLink="/auth/signin">Sign in</a>
+</p>
