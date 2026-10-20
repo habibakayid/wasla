@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, model, output, signal } from '@angular/core';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -14,13 +14,27 @@ import { Post } from '@core/models/post.model';
   templateUrl: './post-card.component.html',
 })
 export class PostCardComponent {
-  @Input() post!: Post;
-  @Output() deleted = new EventEmitter<string>();
-  @Output() bookmarkChanged = new EventEmitter<void>(); 
+  
+  post = model.required<Post>();
+  deleted = output<string>();
 
-  isEditing = false;
-  editText = '';
-  menuOpen = false;
+  isEditing = signal(false);
+  editText = signal('');
+  menuOpen = signal(false);
+
+ 
+  isMine = computed(() => {
+    const me = this.auth.user();
+    return !!me && me._id === this.post().user._id;
+  });
+
+  isLiked = computed(() => {
+    const me = this.auth.user();
+    return !!me && this.post().likes.includes(me._id);
+  });
+
+  
+  words = computed(() => (this.post().body || '').split(/(\s+)/));
 
   constructor(
     private postsService: PostsService,
@@ -28,57 +42,42 @@ export class PostCardComponent {
     private toast: ToastService
   ) {}
 
- 
-  get isMine(): boolean {
-    return !!this.auth.user && this.auth.user._id === this.post.user._id;
-  }
-
-  
-  get isLiked(): boolean {
-    return !!this.auth.user && this.post.likes.includes(this.auth.user._id);
-  }
-
-  
-  get words(): string[] {
-    return (this.post.body || '').split(/(\s+)/);
-  }
-
   
   private setLiked(liked: boolean) {
-    const me = this.auth.user;
+    const me = this.auth.user();
     if (!me) {
       return;
     }
-    const alreadyLiked = this.post.likes.includes(me._id);
 
-    if (liked && !alreadyLiked) {
-      this.post.likes = this.post.likes.concat(me._id);
-      this.post.likesCount = this.post.likesCount + 1;
-    }
-    if (!liked && alreadyLiked) {
-      this.post.likes = this.post.likes.filter((id) => id !== me._id);
-      this.post.likesCount = this.post.likesCount - 1;
-    }
+    this.post.update((p) => {
+      const already = p.likes.includes(me._id);
+      if (liked && !already) {
+        return { ...p, likes: [...p.likes, me._id], likesCount: p.likesCount + 1 };
+      }
+      if (!liked && already) {
+        return { ...p, likes: p.likes.filter((id) => id !== me._id), likesCount: p.likesCount - 1 };
+      }
+      return p;
+    });
   }
 
-  
+ 
   toggleLike() {
-    const wasLiked = this.isLiked;
+    const wasLiked = this.isLiked();
     this.setLiked(!wasLiked);
 
-    this.postsService.toggleLike(this.post._id).subscribe({
+    this.postsService.toggleLike(this.post()._id).subscribe({
       error: () => {
         this.setLiked(wasLiked); // فشل؟ نرجّع زي ما كان
       },
     });
   }
 
- 
   toggleBookmark(showToast: boolean = true) {
-    const was = this.post.bookmarked;
-    this.post.bookmarked = !was;
+    const was = this.post().bookmarked;
+    this.post.update((p) => ({ ...p, bookmarked: !was }));
 
-    this.postsService.toggleBookmark(this.post._id).subscribe({
+    this.postsService.toggleBookmark(this.post()._id).subscribe({
       next: () => {
         if (showToast) {
           const message = was ? 'Bookmark removed' : 'Post bookmarked!';
@@ -86,54 +85,54 @@ export class PostCardComponent {
             this.toggleBookmark(false);
           });
         }
-        this.bookmarkChanged.emit();
       },
       error: () => {
-        this.post.bookmarked = was;
+        this.post.update((p) => ({ ...p, bookmarked: was }));
       },
     });
   }
 
   
   share() {
-    this.postsService.sharePost(this.post._id).subscribe({
+    this.postsService.sharePost(this.post()._id).subscribe({
       next: () => {
-        this.post.sharesCount = this.post.sharesCount + 1;
+        this.post.update((p) => ({ ...p, sharesCount: p.sharesCount + 1 }));
         this.toast.success('Post shared');
       },
     });
   }
 
- 
+  
   startEdit() {
-    this.editText = this.post.body || '';
-    this.isEditing = true;
+    this.editText.set(this.post().body || '');
+    this.isEditing.set(true);
   }
 
   cancelEdit() {
-    this.isEditing = false;
+    this.isEditing.set(false);
   }
 
   saveEdit() {
-    this.postsService.updatePost(this.post._id, this.editText).subscribe({
+    const text = this.editText();
+    this.postsService.updatePost(this.post()._id, text).subscribe({
       next: () => {
-        this.post.body = this.editText;
-        this.isEditing = false;
+        this.post.update((p) => ({ ...p, body: text }));
+        this.isEditing.set(false);
         this.toast.success('Post updated');
       },
     });
   }
 
-
+ 
   deletePost() {
     if (!confirm('Delete this post?')) {
       return;
     }
 
-    this.postsService.deletePost(this.post._id).subscribe({
+    this.postsService.deletePost(this.post()._id).subscribe({
       next: () => {
         this.toast.success('Post deleted');
-        this.deleted.emit(this.post._id);
+        this.deleted.emit(this.post()._id);
       },
     });
   }

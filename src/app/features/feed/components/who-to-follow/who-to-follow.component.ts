@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 
 import { UsersService } from '@core/services/users.service';
@@ -9,7 +9,7 @@ import { UsersService } from '@core/services/users.service';
   templateUrl: './who-to-follow.component.html',
 })
 export class WhoToFollowComponent implements OnInit {
-  users: any[] = [];
+  users = signal<any[]>([]);
 
   constructor(private usersService: UsersService) {}
 
@@ -17,9 +17,9 @@ export class WhoToFollowComponent implements OnInit {
     this.usersService.getSuggestions(8).subscribe({
       next: (res) => {
         if (Array.isArray(res.data)) {
-          this.users = res.data;
+          this.users.set(res.data);
         } else {
-          this.users = res.data.suggestions || res.data.users || [];
+          this.users.set(res.data.suggestions || res.data.users || []);
         }
       },
     });
@@ -29,11 +29,17 @@ export class WhoToFollowComponent implements OnInit {
     return name ? name.split(' ')[0] : '';
   }
 
+  private setFollowed(userId: string, value: boolean) {
+    this.users.update((list) => list.map((u) => (u._id === userId ? { ...u, followed: value } : u)));
+  }
+
   follow(user: any) {
-    user.followed = !user.followed;
+    const was = !!user.followed;
+    this.setFollowed(user._id, !was);
+
     this.usersService.toggleFollow(user._id).subscribe({
       error: () => {
-        user.followed = !user.followed;
+        this.setFollowed(user._id, was);
       },
     });
   }

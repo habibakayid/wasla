@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -19,9 +19,9 @@ export class SettingsComponent {
     confirm: new FormControl('', [Validators.required]),
   });
 
-  submitted = false;
-  savingPassword = false;
-  uploading = false;
+  submitted = signal(false);
+  savingPassword = signal(false);
+  uploading = signal(false);
 
   constructor(
     public auth: AuthService,
@@ -32,12 +32,12 @@ export class SettingsComponent {
 
   hasError(name: string): boolean {
     const control = this.passwordForm.get(name);
-    return !!control && control.invalid && (control.touched || this.submitted);
+    return !!control && control.invalid && (control.touched || this.submitted());
   }
 
   get passwordsDiffer(): boolean {
     const v = this.passwordForm.value;
-    return this.submitted && v.newPassword !== v.confirm;
+    return this.submitted() && v.newPassword !== v.confirm;
   }
 
   toggleTheme() {
@@ -48,30 +48,30 @@ export class SettingsComponent {
     this.auth.logout();
   }
 
- 
+  
   changePassword() {
-    this.submitted = true;
+    this.submitted.set(true);
     if (this.passwordForm.invalid || this.passwordsDiffer) {
       return;
     }
 
     const v = this.passwordForm.value;
-    this.savingPassword = true;
+    this.savingPassword.set(true);
 
     this.usersService.changePassword(v.password || '', v.newPassword || '').subscribe({
       next: () => {
         this.toast.success('Password changed');
         this.passwordForm.reset();
-        this.submitted = false;
-        this.savingPassword = false;
+        this.submitted.set(false);
+        this.savingPassword.set(false);
       },
       error: () => {
-        this.savingPassword = false;
+        this.savingPassword.set(false);
       },
     });
   }
 
-  
+ 
   onPhotoChange(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) {
@@ -88,7 +88,7 @@ export class SettingsComponent {
       return;
     }
 
-    this.uploading = true;
+    this.uploading.set(true);
 
     this.usersService.uploadPhoto(file).subscribe({
       next: (res) => {
@@ -98,10 +98,10 @@ export class SettingsComponent {
           this.auth.updateUser({ photo: newPhoto });
         }
         this.toast.success('Profile photo updated');
-        this.uploading = false;
+        this.uploading.set(false);
       },
       error: () => {
-        this.uploading = false;
+        this.uploading.set(false);
       },
     });
   }

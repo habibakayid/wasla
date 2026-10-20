@@ -2,14 +2,14 @@
   <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-sm p-4">
 
     <div class="flex items-start gap-3">
-      <img *ngIf="auth.user" [src]="auth.user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
+      <img *ngIf="auth.user() as user" [src]="user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
       <textarea name="body" [(ngModel)]="body" rows="2"
                 class="block flex-1 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-brand focus:border-brand placeholder:text-gray-500 resize-none"
                 placeholder="What's on your mind?"></textarea>
     </div>
 
-    <div *ngIf="imagePreview" class="relative mt-3">
-      <img [src]="imagePreview" alt="preview" class="w-full max-h-64 object-cover rounded-lg" />
+    <div *ngIf="imagePreview()" class="relative mt-3">
+      <img [src]="imagePreview()" alt="preview" class="w-full max-h-64 object-cover rounded-lg" />
       <button type="button" (click)="removeImage()"
               class="absolute top-2 end-2 w-7 h-7 rounded-full bg-black/60 text-white" aria-label="Remove image">&times;</button>
     </div>
@@ -17,19 +17,19 @@
     <div class="flex items-center justify-between mt-3">
       <div class="flex items-center gap-2">
         <label class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700">
-          <i class="fa-solid fa-image"></i> Photo
+          <i class="fa-regular fa-image"></i> Photo
           <input type="file" accept="image/*" class="hidden" (change)="onFileChange($event)" />
         </label>
         
         <select name="privacy" [(ngModel)]="privacy"
                 class="text-xs py-1.5 ps-2 pe-8 rounded-full bg-gray-100 dark:bg-neutral-700 border-0 focus:ring-brand">
-          <option value="public"><i class="fa-solid fa-earth-americas"></i> Public</option>
+          <option value="public">Public</option>
         </select>
       </div>
 
-      <button type="submit" [disabled]="sending"
+      <button type="submit" [disabled]="sending()"
               class="text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-rose/40 font-medium rounded-full text-sm px-6 py-2 disabled:opacity-50">
-        {{ sending ? 'Posting...' : 'Post' }}
+        {{ sending() ? 'Posting...' : 'Post' }}
       </button>
     </div>
   </div>

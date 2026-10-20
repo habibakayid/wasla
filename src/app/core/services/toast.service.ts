@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export interface Toast {
   id: number;
-  type: string;
+  type: string; 
   message: string;
   actionLabel?: string;
   action?: () => void;
@@ -10,8 +10,8 @@ export interface Toast {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  toasts: Toast[] = [];
-  nextId = 1;
+  toasts = signal<Toast[]>([]);
+  private nextId = 1;
 
   success(message: string, actionLabel?: string, action?: () => void) {
     this.show('success', message, actionLabel, action);
@@ -26,9 +26,10 @@ export class ToastService {
   }
 
   remove(id: number) {
-    this.toasts = this.toasts.filter((t) => t.id !== id);
+    this.toasts.update((list) => list.filter((t) => t.id !== id));
   }
 
+  
   runAction(toast: Toast) {
     if (toast.action) {
       toast.action();
@@ -40,14 +41,9 @@ export class ToastService {
     const id = this.nextId;
     this.nextId = this.nextId + 1;
 
-    this.toasts.push({
-      id: id,
-      type: type,
-      message: message,
-      actionLabel: actionLabel,
-      action: action,
-    });
+    this.toasts.update((list) => [...list, { id: id, type: type, message: message, actionLabel: actionLabel, action: action }]);
 
+    
     const time = actionLabel ? 6000 : 4000;
     setTimeout(() => {
       this.remove(id);

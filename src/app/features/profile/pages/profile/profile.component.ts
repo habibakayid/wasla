@@ -1,8 +1,7 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, computed, effect, signal, viewChild } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import Chart from 'chart.js/auto';
-
 import { AuthService } from '@core/services/auth.service';
 import { UsersService } from '@core/services/users.service';
 import { Post } from '@core/models/post.model';
@@ -14,53 +13,76 @@ import { PostCardComponent } from '@features/feed/components/post-card/post-card
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('weekChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
+  chartCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('weekChart');
   chart: any = null;
 
-  activeTab = 'analytics'; 
+  activeTab = signal('analytics'); 
 
-  profile: any = null;
-  myPosts: Post[] = [];
-  savedPosts: Post[] = [];
-  loadingPosts = true;
-  loadingSaved = false;
-
-  
-  cards: any[] = [];
+  profile = signal<any>(null);
+  myPosts = signal<Post[]>([]);
+  savedPosts = signal<Post[]>([]);
+  loadingPosts = signal(true);
+  loadingSaved = signal(false);
 
   days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+ 
+  cards = computed(() => {
+    let likes = 0;
+    let comments = 0;
+    let shares = 0;
+
+    for (const post of this.myPosts()) {
+      likes = likes + (post.likesCount || 0);
+      comments = comments + (post.commentsCount || 0);
+      shares = shares + (post.sharesCount || 0);
+    }
+
+    const total = likes + comments + shares;
+
+    return [
+      { name: 'Likes', value: likes, pct: this.percent(likes, total), color: '#e11d48', text: 'text-rose-300' },
+      { name: 'Comments', value: comments, pct: this.percent(comments, total), color: '#38bdf8', text: 'text-sky-300' },
+      { name: 'Shares', value: shares, pct: this.percent(shares, total), color: '#a78bfa', text: 'text-violet-300' },
+    ];
+  });
 
   constructor(
     public auth: AuthService,
     private usersService: UsersService,
     private route: ActivatedRoute
-  ) {}
+  ) {
+   
+    effect(() => {
+      this.myPosts();
+      this.updateChart();
+    });
+  }
 
   ngOnInit() {
-    
+   
     this.route.queryParamMap.subscribe((params) => {
       const tab = params.get('tab');
       if (tab === 'saved' || tab === 'posts' || tab === 'analytics') {
-        this.activeTab = tab;
+        this.activeTab.set(tab);
       }
     });
 
     this.usersService.getMyProfile().subscribe({
       next: (res) => {
-        this.profile = res.data.user || res.data; 
+        this.profile.set(res.data.user || res.data); // شكل الـ data تخمين
       },
     });
 
-    if (this.auth.user) {
-      this.usersService.getUserPosts(this.auth.user._id).subscribe({
+    const me = this.auth.user();
+    if (me) {
+      this.usersService.getUserPosts(me._id).subscribe({
         next: (res) => {
-          this.myPosts = res.data.posts || [];
-          this.loadingPosts = false;
-          this.calculateStats();
-          this.updateChart();
+          this.myPosts.set(res.data.posts || []);
+          this.loadingPosts.set(false);
         },
         error: () => {
-          this.loadingPosts = false;
+          this.loadingPosts.set(false);
         },
       });
     }
@@ -69,7 +91,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.chart = new Chart(this.chartCanvas.nativeElement, {
+    this.chart = new Chart(this.chartCanvas().nativeElement, {
       type: 'line',
       data: {
         labels: this.days,
@@ -89,7 +111,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
         },
       },
     });
-    
+   
     this.updateChart();
   }
 
@@ -100,61 +122,51 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openTab(tab: string) {
-    this.activeTab = tab;
+    this.activeTab.set(tab);
   }
 
   loadSaved() {
-    this.loadingSaved = true;
+    this.loadingSaved.set(true);
     this.usersService.getBookmarks().subscribe({
       next: (res) => {
         if (Array.isArray(res.data)) {
-          this.savedPosts = res.data;
+          this.savedPosts.set(res.data);
         } else {
-          this.savedPosts = res.data.bookmarks || res.data.posts || [];
+          this.savedPosts.set(res.data.bookmarks || res.data.posts || []);
         }
-        this.loadingSaved = false;
+        this.loadingSaved.set(false);
       },
       error: () => {
-        this.loadingSaved = false;
+        this.loadingSaved.set(false);
       },
     });
   }
 
+  trackById(index: number, item: { _id: string }) {
+    return item._id;
+  }
+
+ 
+  replaceMyPost(updated: Post) {
+    this.myPosts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
+  }
+
   removePost(postId: string) {
-    this.myPosts = this.myPosts.filter((p) => p._id !== postId);
-    this.calculateStats();
-    this.updateChart();
+    this.myPosts.update((list) => list.filter((p) => p._id !== postId));
   }
 
-  
-  onSavedChanged() {
-    this.savedPosts = this.savedPosts.filter((p) => p.bookmarked);
-  }
-
-
-  removeSaved(postId: string) {
-    this.savedPosts = this.savedPosts.filter((p) => p._id !== postId);
-  }
-
-  
-  calculateStats() {
-    let likes = 0;
-    let comments = 0;
-    let shares = 0;
-
-    for (const post of this.myPosts) {
-      likes = likes + (post.likesCount || 0);
-      comments = comments + (post.commentsCount || 0);
-      shares = shares + (post.sharesCount || 0);
+ 
+  replaceSaved(updated: Post) {
+    if (!updated.bookmarked) {
+      this.savedPosts.update((list) => list.filter((p) => p._id !== updated._id));
+    } else {
+      this.savedPosts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
     }
+  }
 
-    const total = likes + comments + shares;
-
-    this.cards = [
-      { name: 'Likes', value: likes, pct: this.percent(likes, total), color: '#e11d48', text: 'text-rose-300' },
-      { name: 'Comments', value: comments, pct: this.percent(comments, total), color: '#38bdf8', text: 'text-sky-300' },
-      { name: 'Shares', value: shares, pct: this.percent(shares, total), color: '#a78bfa', text: 'text-violet-300' },
-    ];
+ 
+  removeSaved(postId: string) {
+    this.savedPosts.update((list) => list.filter((p) => p._id !== postId));
   }
 
   percent(part: number, total: number): number {
@@ -164,7 +176,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.round((part / total) * 100);
   }
 
-  
+ 
   ringDash(pct: number): string {
     const filled = (pct / 100) * 175.9;
     return filled + ' 175.9';
@@ -180,8 +192,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     const comments = [0, 0, 0, 0, 0, 0, 0];
     const shares = [0, 0, 0, 0, 0, 0, 0];
 
-    for (const post of this.myPosts) {
-      const day = new Date(post.createdAt).getDay(); 
+    for (const post of this.myPosts()) {
+      const day = new Date(post.createdAt).getDay(); // 0 = Sunday
       likes[day] = likes[day] + (post.likesCount || 0);
       comments[day] = comments[day] + (post.commentsCount || 0);
       shares[day] = shares[day] + (post.sharesCount || 0);

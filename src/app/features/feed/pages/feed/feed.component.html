@@ -1,10 +1,11 @@
 <app-who-to-follow />
 <app-create-post (created)="refresh()" />
 
+
 <div class="flex gap-2 mb-4">
   <button *ngFor="let f of filters" type="button" (click)="changeFilter(f.value)"
           class="px-4 py-1.5 rounded-full text-sm font-medium border"
-          [ngClass]="filter === f.value
+          [ngClass]="filter() === f.value
             ? 'bg-brand text-white border-transparent'
             : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-200'">
     {{ f.label }}
@@ -12,7 +13,7 @@
 </div>
 
 
-<div *ngIf="loading && posts.length === 0" class="space-y-4">
+<div *ngIf="loading() && posts().length === 0" class="space-y-4">
   <div *ngFor="let i of [1, 2, 3]" class="animate-pulse bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700"></div>
@@ -27,21 +28,22 @@
 </div>
 
 
-<div *ngIf="!loading && posts.length === 0"
+<div *ngIf="!loading() && posts().length === 0"
      class="text-center bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-10">
-  <p class="text-3xl mb-2">📭</p>
+  <p class="text-3xl mb-2 text-gray-400"><i class="fa-solid fa-inbox"></i></p>
   <p class="font-semibold">No posts here yet</p>
   <p class="text-sm text-gray-500 dark:text-gray-400">Follow people or publish your first post.</p>
 </div>
 
 
 <div class="space-y-4">
-  <app-post-card *ngFor="let post of posts" [post]="post" (deleted)="removePost($event)" />
+  <app-post-card *ngFor="let post of posts(); trackBy: trackById" [post]="post" (postChange)="replacePost($event)" (deleted)="removePost($event)" />
 </div>
 
-<div *ngIf="hasMore && posts.length > 0" class="text-center mt-6">
-  <button type="button" (click)="loadMore()" [disabled]="loading"
+
+<div *ngIf="hasMore() && posts().length > 0" class="text-center mt-6">
+  <button type="button" (click)="loadMore()" [disabled]="loading()"
           class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-50">
-    {{ loading ? 'Loading...' : 'Load more' }}
+    {{ loading() ? 'Loading...' : 'Load more' }}
   </button>
 </div>

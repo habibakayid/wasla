@@ -2,47 +2,74 @@ import { Routes } from '@angular/router';
 
 import { AuthGuard, GuestGuard } from '@core/guards/auth.guard';
 
-import { AuthLayoutComponent } from '@layouts/auth-layout/auth-layout.component';
-import { MainLayoutComponent } from '@layouts/main-layout/main-layout.component';
-
-import { SigninComponent } from '@features/auth/pages/signin/signin.component';
-import { SignupComponent } from '@features/auth/pages/signup/signup.component';
-import { FeedComponent } from '@features/feed/pages/feed/feed.component';
-import { ExploreComponent } from '@features/feed/pages/explore/explore.component';
-import { PostDetailsComponent } from '@features/post-details/pages/post-details/post-details.component';
-import { ProfileComponent } from '@features/profile/pages/profile/profile.component';
-import { NotificationsComponent } from '@features/notifications/pages/notifications/notifications.component';
-import { SettingsComponent } from '@features/settings/pages/settings/settings.component';
-// import { NotFoundComponent } from '@features/not-found/pages/not-found/not-found.component';
 
 export const routes: Routes = [
-  
+ 
   {
     path: 'auth',
-    component: AuthLayoutComponent,
     canActivate: [GuestGuard],
+    loadComponent: () => import('@layouts/auth-layout/auth-layout.component').then((m) => m.AuthLayoutComponent),
     children: [
       { path: '', redirectTo: 'signin', pathMatch: 'full' },
-      { path: 'signin', component: SigninComponent, title: 'Sign in · Wasla' },
-      { path: 'signup', component: SignupComponent, title: 'Sign up · Wasla' },
-    ],
-  },
-
-  
-  {
-    path: '',
-    component: MainLayoutComponent,
-    canActivate: [AuthGuard],
-    children: [
-      { path: '', component: FeedComponent, pathMatch: 'full', title: 'Home · Wasla' },
-      { path: 'explore', component: ExploreComponent, title: 'Explore · Wasla' },
-      { path: 'posts/:id', component: PostDetailsComponent, title: 'Post · Wasla' },
-      { path: 'profile', component: ProfileComponent, title: 'Profile · Wasla' },
-      { path: 'notifications', component: NotificationsComponent, title: 'Notifications · Wasla' },
-      { path: 'settings', component: SettingsComponent, title: 'Settings · Wasla' },
+      {
+        path: 'signin',
+        title: 'Sign in · Wasla',
+        loadComponent: () => import('@features/auth/pages/signin/signin.component').then((m) => m.SigninComponent),
+      },
+      {
+        path: 'signup',
+        title: 'Sign up · Wasla',
+        loadComponent: () => import('@features/auth/pages/signup/signup.component').then((m) => m.SignupComponent),
+      },
     ],
   },
 
  
-//   { path: '**', component: NotFoundComponent, title: 'Not found · Wasla' },
+  {
+    path: '',
+    canActivate: [AuthGuard],
+    loadComponent: () => import('@layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        title: 'Home · Wasla',
+        loadComponent: () => import('@features/feed/pages/feed/feed.component').then((m) => m.FeedComponent),
+      },
+      {
+        path: 'explore',
+        title: 'Explore · Wasla',
+        loadComponent: () => import('@features/feed/pages/explore/explore.component').then((m) => m.ExploreComponent),
+      },
+      {
+        path: 'posts/:id',
+        title: 'Post · Wasla',
+        loadComponent: () =>
+          import('@features/post-details/pages/post-details/post-details.component').then((m) => m.PostDetailsComponent),
+      },
+      {
+        path: 'profile',
+        title: 'Profile · Wasla',
+        loadComponent: () => import('@features/profile/pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
+        path: 'notifications',
+        title: 'Notifications · Wasla',
+        loadComponent: () =>
+          import('@features/notifications/pages/notifications/notifications.component').then((m) => m.NotificationsComponent),
+      },
+      {
+        path: 'settings',
+        title: 'Settings · Wasla',
+        loadComponent: () => import('@features/settings/pages/settings/settings.component').then((m) => m.SettingsComponent),
+      },
+    ],
+  },
+
+ 
+  // {
+  //   path: '**',
+  //   title: 'Not found · Wasla',
+  //   loadComponent: () => import('@features/not-found/pages/not-found/not-found.component').then((m) => m.NotFoundComponent),
+  // },
 ];

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 
 import { PostsService } from '@core/services/posts.service';
@@ -12,11 +12,12 @@ import { PostCardComponent } from '../../components/post-card/post-card.componen
   templateUrl: './explore.component.html',
 })
 export class ExploreComponent implements OnInit {
-  posts: Post[] = [];
+  posts = signal<Post[]>([]);
+  loading = signal(false);
+  hasMore = signal(true);
+
   page = 1;
   limit = 10;
-  loading = false;
-  hasMore = true;
 
   constructor(private postsService: PostsService) {}
 
@@ -25,27 +26,27 @@ export class ExploreComponent implements OnInit {
   }
 
   loadPosts() {
-    if (this.loading) {
+    if (this.loading()) {
       return;
     }
-    this.loading = true;
+    this.loading.set(true);
 
     this.postsService.getAllPosts(this.page, this.limit).subscribe({
       next: (res) => {
         const list: Post[] = res.data.posts || [];
-        this.posts = this.posts.concat(list);
+        this.posts.update((old) => old.concat(list));
 
         const pagination = res.meta && res.meta.pagination;
         if (pagination) {
-          this.hasMore = pagination.currentPage < pagination.numberOfPages;
+          this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
         } else {
-          this.hasMore = list.length === this.limit;
+          this.hasMore.set(list.length === this.limit);
         }
 
-        this.loading = false;
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }
@@ -55,7 +56,15 @@ export class ExploreComponent implements OnInit {
     this.loadPosts();
   }
 
+  trackById(index: number, item: { _id: string }) {
+    return item._id;
+  }
+
+  replacePost(updated: Post) {
+    this.posts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
+  }
+
   removePost(postId: string) {
-    this.posts = this.posts.filter((p) => p._id !== postId);
+    this.posts.update((list) => list.filter((p) => p._id !== postId));
   }
 }

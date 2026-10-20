@@ -1,9 +1,9 @@
-<a routerLink="/" class="inline-block mb-3 text-sm text-brand dark:text-rose hover:underline">← Back to feed</a>
+<a routerLink="/" class="inline-block mb-3 text-sm text-brand dark:text-rose hover:underline"><i class="fa-solid fa-arrow-left"></i> Back to feed</a>
 
-<p *ngIf="loadingPost" class="text-sm text-gray-500">Loading...</p>
+<p *ngIf="loadingPost()" class="text-sm text-gray-500">Loading...</p>
 
-<div *ngIf="post">
-  <app-post-card [post]="post" (deleted)="onPostDeleted()" />
+<div *ngIf="post() as currentPost">
+  <app-post-card [post]="currentPost" (postChange)="post.set($event)" (deleted)="onPostDeleted()" />
 
   
   <form (ngSubmit)="sendComment()" class="mt-4">
@@ -13,15 +13,15 @@
         <textarea id="comment" name="comment" [(ngModel)]="newComment" rows="3"
                   class="block w-full px-0 text-sm bg-transparent border-0 focus:ring-0 placeholder:text-gray-500 resize-none"
                   placeholder="Write a comment..."></textarea>
-        <p *ngIf="imageFile" class="text-xs text-gray-500">📎 {{ imageFile.name }}</p>
+        <p *ngIf="imageFile() as file" class="text-xs text-gray-500"><i class="fa-solid fa-paperclip"></i> {{ file.name }}</p>
       </div>
       <div class="flex items-center justify-between px-3 py-2 border-t border-gray-200 dark:border-neutral-700">
-        <button type="submit" [disabled]="sending"
+        <button type="submit" [disabled]="sending()"
                 class="text-white bg-brand hover:bg-brand-strong focus:ring-4 focus:ring-rose/40 font-medium rounded-lg text-sm px-4 py-2 disabled:opacity-50">
-          {{ sending ? 'Posting...' : 'Post comment' }}
+          {{ sending() ? 'Posting...' : 'Post comment' }}
         </button>
         <label class="p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700">
-          <i class="fa-solid fa-paperclip"></i>
+          <i class="fa-regular fa-image"></i>
           <span class="sr-only">Upload image</span>
           <input type="file" accept="image/*" class="hidden" (change)="onFileChange($event)" />
         </label>
@@ -29,23 +29,23 @@
     </div>
   </form>
 
-  
-  <h2 class="font-semibold mt-6 mb-3">Comments ({{ post.commentsCount }})</h2>
+ 
+  <h2 class="font-semibold mt-6 mb-3">Comments ({{ currentPost.commentsCount }})</h2>
 
-  <p *ngIf="!loadingComments && comments.length === 0" class="text-sm text-gray-500 text-center py-6">
-    <i class="fa-solid fa-comment"></i> No comments yet. Be the first to comment.
+  <p *ngIf="!loadingComments() && comments().length === 0" class="text-sm text-gray-500 text-center py-6">
+    No comments yet. Be the first to comment.
   </p>
 
   <div class="space-y-4">
-    <app-comment-item *ngFor="let c of comments"
-                      [comment]="c" [postId]="postId" [postOwnerId]="post.user._id"
-                      (deleted)="removeComment($event)" />
+    <app-comment-item *ngFor="let c of comments(); trackBy: trackById"
+                      [comment]="c" [postId]="postId" [postOwnerId]="currentPost.user._id"
+                      (commentChange)="replaceComment($event)" (deleted)="removeComment($event)" />
   </div>
 
-  <div *ngIf="hasMore && comments.length > 0" class="text-center mt-4">
-    <button type="button" (click)="loadMore()" [disabled]="loadingComments"
+  <div *ngIf="hasMore() && comments().length > 0" class="text-center mt-4">
+    <button type="button" (click)="loadMore()" [disabled]="loadingComments()"
             class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-50">
-      {{ loadingComments ? 'Loading...' : 'Load more comments' }}
+      {{ loadingComments() ? 'Loading...' : 'Load more comments' }}
     </button>
   </div>
 </div>

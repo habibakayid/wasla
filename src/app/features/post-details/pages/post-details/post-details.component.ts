@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -18,18 +18,19 @@ import { CommentItemComponent } from '../../components/comment-item/comment-item
 })
 export class PostDetailsComponent implements OnInit {
   postId = '';
-  post: Post | null = null;
-  loadingPost = true;
+  post = signal<Post | null>(null);
+  loadingPost = signal(true);
 
-  comments: Comment[] = [];
+  comments = signal<Comment[]>([]);
+  hasMore = signal(true);
+  loadingComments = signal(false);
+
+  newComment = signal('');
+  imageFile = signal<File | null>(null);
+  sending = signal(false);
+
   page = 1;
   limit = 10;
-  hasMore = true;
-  loadingComments = false;
-
-  newComment = '';
-  imageFile: File | null = null;
-  sending = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -44,12 +45,12 @@ export class PostDetailsComponent implements OnInit {
 
     this.postsService.getPost(this.postId).subscribe({
       next: (res) => {
-        
-        this.post = res.data.post || res.data;
-        this.loadingPost = false;
+       
+        this.post.set(res.data.post || res.data);
+        this.loadingPost.set(false);
       },
       error: () => {
-        this.loadingPost = false;
+        this.loadingPost.set(false);
       },
     });
 
@@ -57,10 +58,10 @@ export class PostDetailsComponent implements OnInit {
   }
 
   loadComments() {
-    if (this.loadingComments) {
+    if (this.loadingComments()) {
       return;
     }
-    this.loadingComments = true;
+    this.loadingComments.set(true);
 
     this.commentsService.getComments(this.postId, this.page, this.limit).subscribe({
       next: (res) => {
@@ -70,19 +71,19 @@ export class PostDetailsComponent implements OnInit {
         } else {
           list = res.data.comments || [];
         }
-        this.comments = this.comments.concat(list);
+        this.comments.update((old) => old.concat(list));
 
         const pagination = res.meta && res.meta.pagination;
         if (pagination) {
-          this.hasMore = pagination.currentPage < pagination.numberOfPages;
+          this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
         } else {
-          this.hasMore = list.length === this.limit;
+          this.hasMore.set(list.length === this.limit);
         }
 
-        this.loadingComments = false;
+        this.loadingComments.set(false);
       },
       error: () => {
-        this.loadingComments = false;
+        this.loadingComments.set(false);
       },
     });
   }
@@ -95,47 +96,52 @@ export class PostDetailsComponent implements OnInit {
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.imageFile = input.files[0];
+      this.imageFile.set(input.files[0]);
     }
   }
 
   sendComment() {
-    if (this.newComment.trim() === '' && !this.imageFile) {
+    if (this.newComment().trim() === '' && !this.imageFile()) {
       return;
     }
-    this.sending = true;
+    this.sending.set(true);
 
-    this.commentsService.createComment(this.postId, this.newComment, this.imageFile).subscribe({
+    this.commentsService.createComment(this.postId, this.newComment(), this.imageFile()).subscribe({
       next: () => {
-        this.newComment = '';
-        this.imageFile = null;
-        this.sending = false;
+        this.newComment.set('');
+        this.imageFile.set(null);
+        this.sending.set(false);
         this.toast.success('Comment added');
 
-        
-        this.comments = [];
+       
+        this.comments.set([]);
         this.page = 1;
-        this.hasMore = true;
-        this.loadingComments = false;
+        this.hasMore.set(true);
+        this.loadingComments.set(false);
         this.loadComments();
-        if (this.post) {
-          this.post.commentsCount = this.post.commentsCount + 1;
-        }
+        this.post.update((p) => (p ? { ...p, commentsCount: p.commentsCount + 1 } : p));
       },
       error: () => {
-        this.sending = false;
+        this.sending.set(false);
       },
     });
   }
 
-  removeComment(commentId: string) {
-    this.comments = this.comments.filter((c) => c._id !== commentId);
-    if (this.post) {
-      this.post.commentsCount = Math.max(0, this.post.commentsCount - 1);
-    }
+  trackById(index: number, item: { _id: string }) {
+    return item._id;
   }
 
   
+  replaceComment(updated: Comment) {
+    this.comments.update((list) => list.map((c) => (c._id === updated._id ? updated : c)));
+  }
+
+  removeComment(commentId: string) {
+    this.comments.update((list) => list.filter((c) => c._id !== commentId));
+    this.post.update((p) => (p ? { ...p, commentsCount: Math.max(0, p.commentsCount - 1) } : p));
+  }
+
+
   onPostDeleted() {
     this.router.navigate(['/']);
   }

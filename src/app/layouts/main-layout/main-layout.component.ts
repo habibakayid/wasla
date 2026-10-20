@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf, DatePipe } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -15,33 +15,34 @@ import { SuggestionsComponent } from '@features/feed/components/suggestions/sugg
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit {
-  profile: any = null; 
-  recent: any[] = [];
-  collapsed = false;
+  profile = signal<any>(null); 
+  recent = signal<any[]>([]); 
+  collapsed = signal(false); 
 
   
-links = [
-  { label: 'Home', icon: 'fa-solid fa-house', path: '/', query: {}, exact: true },
-  { label: 'Explore', icon: 'fa-solid fa-compass', path: '/explore', query: {}, exact: false },
-  { label: 'Bookmarks', icon: 'fa-solid fa-bookmark', path: '/profile', query: { tab: 'saved' }, exact: false },
-  { label: 'Notifications', icon: 'fa-solid fa-bell', path: '/notifications', query: {}, exact: false },
-  { label: 'Profile', icon: 'fa-solid fa-user', path: '/profile', query: {}, exact: false },
-  { label: 'Settings', icon: 'fa-solid fa-gear', path: '/settings', query: {}, exact: false },
-];
+  links = [
+    { label: 'Home', icon: 'fa-house', path: '/', query: {}, exact: true },
+    { label: 'Explore', icon: 'fa-compass', path: '/explore', query: {}, exact: false },
+    { label: 'Bookmarks', icon: 'fa-bookmark', path: '/profile', query: { tab: 'saved' }, exact: false },
+    { label: 'Notifications', icon: 'fa-bell', path: '/notifications', query: {}, exact: false },
+    { label: 'Profile', icon: 'fa-user', path: '/profile', query: {}, exact: false },
+    { label: 'Settings', icon: 'fa-gear', path: '/settings', query: {}, exact: false },
+  ];
+
   constructor(
     public auth: AuthService,
     public theme: ThemeService,
     public notificationsService: NotificationsService,
     private usersService: UsersService
   ) {
-    this.collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    this.collapsed.set(localStorage.getItem('sidebarCollapsed') === 'true');
   }
 
   ngOnInit() {
     this.usersService.getMyProfile().subscribe({
       next: (res) => {
         
-        this.profile = res.data.user || res.data;
+        this.profile.set(res.data.user || res.data);
       },
     });
 
@@ -49,14 +50,14 @@ links = [
 
     this.notificationsService.getNotifications('false', 1, 4).subscribe({
       next: (res) => {
-        this.recent = res.data.notifications || [];
+        this.recent.set(res.data.notifications || []);
       },
     });
   }
 
   toggleSidebar() {
-    this.collapsed = !this.collapsed;
-    localStorage.setItem('sidebarCollapsed', String(this.collapsed));
+    this.collapsed.update((value) => !value);
+    localStorage.setItem('sidebarCollapsed', String(this.collapsed()));
   }
 
   toggleTheme() {

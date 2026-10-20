@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,14 +12,14 @@ import { ToastService } from '@core/services/toast.service';
   templateUrl: './create-post.component.html',
 })
 export class CreatePostComponent {
- 
-  @Output() created = new EventEmitter<void>();
+  
+  created = output<void>();
 
-  body = '';
-  privacy = 'public'; 
-  imageFile: File | null = null;
-  imagePreview = '';
-  sending = false;
+  body = signal('');
+  privacy = signal('public'); 
+  imageFile = signal<File | null>(null);
+  imagePreview = signal('');
+  sending = signal(false);
 
   constructor(
     public auth: AuthService,
@@ -42,33 +42,33 @@ export class CreatePostComponent {
         return;
       }
 
-      this.imageFile = file;
-      this.imagePreview = URL.createObjectURL(file);
+      this.imageFile.set(file);
+      this.imagePreview.set(URL.createObjectURL(file));
     }
   }
 
   removeImage() {
-    this.imageFile = null;
-    this.imagePreview = '';
+    this.imageFile.set(null);
+    this.imagePreview.set('');
   }
 
   submit() {
-    if (this.body.trim() === '' && !this.imageFile) {
+    if (this.body().trim() === '' && !this.imageFile()) {
       return;
     }
 
-    this.sending = true;
+    this.sending.set(true);
 
-    this.postsService.createPost(this.body, this.imageFile, this.privacy).subscribe({
+    this.postsService.createPost(this.body(), this.imageFile(), this.privacy()).subscribe({
       next: () => {
-        this.body = '';
+        this.body.set('');
         this.removeImage();
-        this.sending = false;
+        this.sending.set(false);
         this.toast.success('Post published');
         this.created.emit();
       },
       error: () => {
-        this.sending = false;
+        this.sending.set(false);
       },
     });
   }

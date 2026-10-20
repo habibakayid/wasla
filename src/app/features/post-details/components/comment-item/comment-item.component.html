@@ -1,41 +1,41 @@
 <div class="flex gap-3">
-  <img [src]="comment.commentCreator.photo" alt="" class="w-9 h-9 rounded-full object-cover shrink-0" />
+  <img [src]="comment().commentCreator.photo" alt="" class="w-9 h-9 rounded-full object-cover shrink-0" />
 
   <div class="flex-1 min-w-0">
     <div class="bg-gray-100 dark:bg-neutral-700 rounded-2xl px-4 py-2">
-      <p class="text-sm font-semibold">{{ comment.commentCreator.name }}</p>
+      <p class="text-sm font-semibold">{{ comment().commentCreator.name }}</p>
 
-      <p *ngIf="!isEditing" class="text-sm whitespace-pre-line">{{ comment.content }}</p>
-      <img *ngIf="comment.image && !isEditing" [src]="comment.image" alt="" class="mt-2 max-h-56 rounded-lg" />
+      <p *ngIf="!isEditing()" class="text-sm whitespace-pre-line">{{ comment().content }}</p>
+      <img *ngIf="comment().image && !isEditing()" [src]="comment().image" alt="" class="mt-2 max-h-56 rounded-lg" />
 
-      <div *ngIf="isEditing">
+      <div *ngIf="isEditing()">
         <textarea [(ngModel)]="editText" rows="2"
                   class="block w-full text-sm bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"></textarea>
         <div class="flex gap-2 mt-2">
           <button type="button" (click)="saveEdit()" class="text-xs text-white bg-brand px-3 py-1 rounded-lg">Save</button>
-          <button type="button" (click)="isEditing = false" class="text-xs px-3 py-1 rounded-lg border border-gray-300 dark:border-neutral-500">Cancel</button>
+          <button type="button" (click)="isEditing.set(false)" class="text-xs px-3 py-1 rounded-lg border border-gray-300 dark:border-neutral-500">Cancel</button>
         </div>
       </div>
     </div>
 
-    
+   
     <div class="flex items-center gap-4 mt-1 ms-2 text-xs text-gray-500 dark:text-gray-400">
-      <span>{{ comment.createdAt | date: 'short' }}</span>
-      <button type="button" (click)="toggleLike()" class="font-medium" [ngClass]="isLiked ? 'text-rose' : ''">
-        {{ isLiked ? 'Liked' : 'Like' }} · {{ comment.likes.length }}
+      <span>{{ comment().createdAt | date: 'short' }}</span>
+      <button type="button" (click)="toggleLike()" class="font-medium" [ngClass]="isLiked() ? 'text-rose' : ''">
+        {{ isLiked() ? 'Liked' : 'Like' }} · {{ comment().likes.length }}
       </button>
       <button type="button" (click)="toggleReplies()" class="font-medium">
-        Reply<span *ngIf="(comment.repliesCount || 0) > 0"> · {{ comment.repliesCount }}</span>
+        Reply<span *ngIf="(comment().repliesCount || 0) > 0"> · {{ comment().repliesCount }}</span>
       </button>
-      <button *ngIf="isMine && !isEditing" type="button" (click)="startEdit()">Edit</button>
-      <button *ngIf="canDelete" type="button" (click)="remove()" class="text-red-600">Delete</button>
+      <button *ngIf="isMine() && !isEditing()" type="button" (click)="startEdit()">Edit</button>
+      <button *ngIf="canDelete()" type="button" (click)="remove()" class="text-red-600">Delete</button>
     </div>
 
-    
-    <div *ngIf="showReplies" class="mt-3 ms-2 space-y-3 border-s-2 border-gray-200 dark:border-neutral-600 ps-3">
-      <p *ngIf="loadingReplies" class="text-xs text-gray-500">Loading...</p>
+   
+    <div *ngIf="showReplies()" class="mt-3 ms-2 space-y-3 border-s-2 border-gray-200 dark:border-neutral-600 ps-3">
+      <p *ngIf="loadingReplies()" class="text-xs text-gray-500">Loading...</p>
 
-      <div *ngFor="let r of replies" class="flex gap-2">
+      <div *ngFor="let r of replies()" class="flex gap-2">
         <img [src]="r.commentCreator?.photo" alt="" class="w-7 h-7 rounded-full object-cover" />
         <div class="bg-gray-100 dark:bg-neutral-700 rounded-2xl px-3 py-1.5">
           <p class="text-xs font-semibold">{{ r.commentCreator?.name }}</p>
@@ -46,7 +46,7 @@
       <div class="flex gap-2">
         <input type="text" [(ngModel)]="replyText" placeholder="Write a reply..."
                class="flex-1 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-full px-4 py-1.5 focus:ring-brand focus:border-brand" />
-        <button type="button" (click)="sendReply()" [disabled]="sendingReply"
+        <button type="button" (click)="sendReply()" [disabled]="sendingReply()"
                 class="text-xs text-white bg-brand hover:bg-brand-strong px-4 rounded-full disabled:opacity-50">
           Send
         </button>

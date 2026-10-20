@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -10,12 +10,13 @@ import { NotificationsService } from '@core/services/notifications.service';
   templateUrl: './notifications.component.html',
 })
 export class NotificationsComponent implements OnInit {
-  notifications: any[] = [];
-  tab = 'all'; 
+  notifications = signal<any[]>([]);
+  tab = signal('all'); // 'all' | 'unread'
+  hasMore = signal(true);
+  loading = signal(false);
+
   page = 1;
   limit = 15;
-  hasMore = true;
-  loading = false;
 
   constructor(
     private notificationsService: NotificationsService,
@@ -27,38 +28,38 @@ export class NotificationsComponent implements OnInit {
   }
 
   changeTab(tab: string) {
-    this.tab = tab;
-    this.notifications = [];
+    this.tab.set(tab);
+    this.notifications.set([]);
     this.page = 1;
-    this.hasMore = true;
-    this.loading = false;
+    this.hasMore.set(true);
+    this.loading.set(false);
     this.load();
   }
 
   load() {
-    if (this.loading) {
+    if (this.loading()) {
       return;
     }
-    this.loading = true;
+    this.loading.set(true);
 
-    const unread = this.tab === 'unread' ? 'true' : 'false';
+    const unread = this.tab() === 'unread' ? 'true' : 'false';
 
     this.notificationsService.getNotifications(unread, this.page, this.limit).subscribe({
       next: (res) => {
         const list: any[] = res.data.notifications || [];
-        this.notifications = this.notifications.concat(list);
+        this.notifications.update((old) => old.concat(list));
 
         const pagination = res.meta && res.meta.pagination;
         if (pagination) {
-          this.hasMore = pagination.currentPage < pagination.numberOfPages;
+          this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
         } else {
-          this.hasMore = list.length === this.limit;
+          this.hasMore.set(list.length === this.limit);
         }
 
-        this.loading = false;
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }
@@ -68,16 +69,25 @@ export class NotificationsComponent implements OnInit {
     this.load();
   }
 
+  trackById(index: number, item: { _id: string }) {
+    return item._id;
+  }
+
+ 
+  private setRead(id: string, value: boolean) {
+    this.notifications.update((list) => list.map((n) => (n._id === id ? { ...n, isRead: value } : n)));
+  }
+
   open(n: any) {
-    
+   
     if (!n.isRead) {
-      n.isRead = true;
+      this.setRead(n._id, true);
       this.notificationsService.markAsRead(n._id).subscribe({
         next: () => {
           this.notificationsService.refreshUnreadCount();
         },
         error: () => {
-          n.isRead = false;
+          this.setRead(n._id, false);
         },
       });
     }
@@ -92,10 +102,8 @@ export class NotificationsComponent implements OnInit {
   markAllRead() {
     this.notificationsService.markAllAsRead().subscribe({
       next: () => {
-        for (const n of this.notifications) {
-          n.isRead = true;
-        }
-        this.notificationsService.unreadCount = 0;
+        this.notifications.update((list) => list.map((n) => ({ ...n, isRead: true })));
+        this.notificationsService.unreadCount.set(0);
       },
     });
   }

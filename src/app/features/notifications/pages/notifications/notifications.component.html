@@ -9,28 +9,28 @@
 
   <div class="flex gap-2 p-3">
     <button type="button" (click)="changeTab('all')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
-            [ngClass]="tab === 'all' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
+            [ngClass]="tab() === 'all' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
       All
     </button>
     <button type="button" (click)="changeTab('unread')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
-            [ngClass]="tab === 'unread' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
+            [ngClass]="tab() === 'unread' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
       Unread
     </button>
   </div>
 
-  <p *ngIf="loading && notifications.length === 0" class="p-4 text-sm text-gray-500">Loading...</p>
+  <p *ngIf="loading() && notifications().length === 0" class="p-4 text-sm text-gray-500">Loading...</p>
 
-  <div *ngIf="!loading && notifications.length === 0" class="text-center py-12">
-    <p class="text-3xl mb-2"><i class="fa-solid fa-bell"></i></p>
+  <div *ngIf="!loading() && notifications().length === 0" class="text-center py-12">
+    <p class="text-3xl mb-2 text-gray-400"><i class="fa-regular fa-bell"></i></p>
     <p class="font-semibold">You're all caught up</p>
   </div>
 
   <ul>
-    <li *ngFor="let n of notifications">
+    <li *ngFor="let n of notifications(); trackBy: trackById">
       <button type="button" (click)="open(n)"
               class="w-full flex items-start gap-3 text-start px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 border-t border-gray-100 dark:border-neutral-700"
               [ngClass]="n.isRead ? '' : 'bg-rose/5'">
-        
+        <!-- sender / message / createdAt تخمين لحد ما نشوف إشعار حقيقي -->
         <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
         <div class="flex-1 min-w-0 text-sm">
           <p><span class="font-semibold">{{ n.sender?.name }}</span> {{ n.message || n.type }}</p>
@@ -41,10 +41,10 @@
     </li>
   </ul>
 
-  <div *ngIf="hasMore && notifications.length > 0" class="text-center p-4">
-    <button type="button" (click)="loadMore()" [disabled]="loading"
+  <div *ngIf="hasMore() && notifications().length > 0" class="text-center p-4">
+    <button type="button" (click)="loadMore()" [disabled]="loading()"
             class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 disabled:opacity-50">
-      {{ loading ? 'Loading...' : 'Load more' }}
+      {{ loading() ? 'Loading...' : 'Load more' }}
     </button>
   </div>
 </div>

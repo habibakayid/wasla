@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 
 import { PostsService } from '@core/services/posts.service';
@@ -13,12 +13,13 @@ import { WhoToFollowComponent } from '../../components/who-to-follow/who-to-foll
   templateUrl: './feed.component.html',
 })
 export class FeedComponent implements OnInit {
-  posts: Post[] = [];
-  filter = 'all';
+  posts = signal<Post[]>([]);
+  filter = signal('all');
+  loading = signal(false);
+  hasMore = signal(true);
+
   page = 1;
   limit = 10;
-  loading = false;
-  hasMore = true;
 
   filters = [
     { label: 'All', value: 'all' },
@@ -33,42 +34,42 @@ export class FeedComponent implements OnInit {
   }
 
   changeFilter(value: string) {
-    this.filter = value;
+    this.filter.set(value);
     this.refresh();
   }
 
-
+  
   refresh() {
     this.page = 1;
-    this.posts = [];
-    this.hasMore = true;
-    this.loading = false;
+    this.posts.set([]);
+    this.hasMore.set(true);
+    this.loading.set(false);
     this.loadPosts();
   }
 
   loadPosts() {
-    if (this.loading) {
+    if (this.loading()) {
       return;
     }
-    this.loading = true;
+    this.loading.set(true);
 
-    this.postsService.getFeed(this.filter, this.page, this.limit).subscribe({
+    this.postsService.getFeed(this.filter(), this.page, this.limit).subscribe({
       next: (res) => {
         const list: Post[] = res.data.posts || [];
-        this.posts = this.posts.concat(list);
+        this.posts.update((old) => old.concat(list));
 
-        
+       
         const pagination = res.meta && res.meta.pagination;
         if (pagination) {
-          this.hasMore = pagination.currentPage < pagination.numberOfPages;
+          this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
         } else {
-          this.hasMore = list.length === this.limit;
+          this.hasMore.set(list.length === this.limit);
         }
 
-        this.loading = false;
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }
@@ -78,7 +79,17 @@ export class FeedComponent implements OnInit {
     this.loadPosts();
   }
 
+  
+  trackById(index: number, item: { _id: string }) {
+    return item._id;
+  }
+
+ 
+  replacePost(updated: Post) {
+    this.posts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
+  }
+
   removePost(postId: string) {
-    this.posts = this.posts.filter((p) => p._id !== postId);
+    this.posts.update((list) => list.filter((p) => p._id !== postId));
   }
 }

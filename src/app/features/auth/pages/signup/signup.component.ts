@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -23,7 +23,7 @@ function minAge13(control: AbstractControl): ValidationErrors | null {
   templateUrl: './signup.component.html',
 })
 export class SignupComponent {
-
+  
   form = new FormGroup({
    
     name: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -36,9 +36,9 @@ export class SignupComponent {
     gender: new FormControl('', [Validators.required]),
   });
 
-  step = 1; 
-  showPassword = false;
-  loading = false;
+  step = signal(1); 
+  showPassword = signal(false);
+  loading = signal(false);
   maxDate = new Date().toISOString().split('T')[0]; 
 
   constructor(
@@ -47,7 +47,7 @@ export class SignupComponent {
     private router: Router
   ) {}
 
-
+ 
   hasError(name: string): boolean {
     const control = this.form.get(name);
     return !!control && control.touched && control.invalid;
@@ -66,17 +66,17 @@ export class SignupComponent {
   next() {
     ['name', 'email', 'password', 'rePassword'].forEach((n) => this.form.get(n)!.markAsTouched());
     if (this.step1Valid) {
-      this.step = 2;
+      this.step.set(2);
     }
   }
 
   back() {
-    this.step = 1;
+    this.step.set(1);
   }
 
   submit() {
    
-    if (this.step === 1) {
+    if (this.step() === 1) {
       this.next();
       return;
     }
@@ -85,7 +85,7 @@ export class SignupComponent {
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
 
     this.usersService.signup(this.form.value).subscribe({
       next: (res) => {
@@ -93,7 +93,7 @@ export class SignupComponent {
         this.router.navigate(['/']);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }

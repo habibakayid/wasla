@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -17,9 +17,9 @@ export class SigninComponent {
     password: new FormControl('', [Validators.required]),
   });
 
-  showPassword = false;
-  loading = false;
-  submitted = false;
+  showPassword = signal(false);
+  loading = signal(false);
+  submitted = signal(false);
 
   constructor(
     private usersService: UsersService,
@@ -28,25 +28,25 @@ export class SigninComponent {
     private route: ActivatedRoute
   ) {}
 
-  
+ 
   hasError(name: string): boolean {
     const control = this.form.get(name);
-    return !!control && control.invalid && (control.touched || this.submitted);
+    return !!control && control.invalid && (control.touched || this.submitted());
   }
 
   submit() {
-    this.submitted = true;
+    this.submitted.set(true);
     if (this.form.invalid) {
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
 
     this.usersService.signin(this.form.value).subscribe({
       next: (res) => {
         this.auth.saveSession(res.data.token, res.data.user);
 
-       
+        
         let returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
           returnUrl = '/';
@@ -54,7 +54,7 @@ export class SigninComponent {
         this.router.navigateByUrl(returnUrl);
       },
       error: () => {
-        this.loading = false; 
+        this.loading.set(false); 
       },
     });
   }

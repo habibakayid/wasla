@@ -3,14 +3,14 @@
 
 <div class="steps">
   <span class="steps__bar steps__bar--done"></span>
-  <span class="steps__bar" [class.steps__bar--done]="step === 2"></span>
-  <span class="steps__label">Step {{ step }} of 2</span>
+  <span class="steps__bar" [class.steps__bar--done]="step() === 2"></span>
+  <span class="steps__label">Step {{ step() }} of 2</span>
 </div>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
 
-
-  <div *ngIf="step === 1">
+ 
+  <div *ngIf="step() === 1">
     <div class="field">
       <label class="field__label" for="name">Full name</label>
       <input id="name" class="field__input" type="text" formControlName="name" autocomplete="name"
@@ -23,7 +23,7 @@
     <div class="field">
       <div class="field__row">
         <label class="field__label" for="email">Email</label>
-        <span *ngIf="form.controls.email.valid && form.controls.email.dirty" class="field__status">✓ valid email</span>
+        <span *ngIf="form.controls.email.valid && form.controls.email.dirty" class="field__status"><i class="fa-solid fa-check"></i> valid email</span>
       </div>
       <input id="email" class="field__input" type="email" formControlName="email"
              autocomplete="email" inputmode="email" [class.is-invalid]="hasError('email')" />
@@ -36,10 +36,10 @@
       <label class="field__label" for="password">Password</label>
       <div class="field__control">
         <input id="password" class="field__input field__input--has-toggle"
-               [type]="showPassword ? 'text' : 'password'" formControlName="password"
+               [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                autocomplete="new-password" [class.is-invalid]="hasError('password')" />
-        <button type="button" class="field__toggle" (click)="showPassword = !showPassword">
-          {{ showPassword ? 'Hide' : 'Show' }}
+        <button type="button" class="field__toggle" (click)="showPassword.set(!showPassword())">
+          {{ showPassword() ? 'Hide' : 'Show' }}
         </button>
       </div>
       <span *ngIf="hasError('password')" class="field__error">
@@ -50,9 +50,9 @@
     <div class="field">
       <div class="field__row">
         <label class="field__label" for="rePassword">Confirm password</label>
-        <span *ngIf="form.controls.rePassword.value && !passwordsDiffer" class="field__status">✓ passwords match</span>
+        <span *ngIf="form.controls.rePassword.value && !passwordsDiffer" class="field__status"><i class="fa-solid fa-check"></i> passwords match</span>
       </div>
-      <input id="rePassword" class="field__input" [type]="showPassword ? 'text' : 'password'"
+      <input id="rePassword" class="field__input" [type]="showPassword() ? 'text' : 'password'"
              formControlName="rePassword" autocomplete="new-password"
              [class.is-invalid]="form.controls.rePassword.touched && passwordsDiffer" />
       <span *ngIf="form.controls.rePassword.touched && passwordsDiffer" class="field__error">Passwords do not match.</span>
@@ -61,8 +61,8 @@
     <button class="btn btn--primary" type="button" (click)="next()">Continue</button>
   </div>
 
-  
-  <div *ngIf="step === 2">
+
+  <div *ngIf="step() === 2">
     <div class="field">
       <label class="field__label" for="username">Username</label>
       <input id="username" class="field__input" type="text" formControlName="username"
@@ -99,9 +99,9 @@
     </fieldset>
 
     <div class="actions">
-      <button class="btn btn--ghost" type="button" (click)="back()" [disabled]="loading">Back</button>
-      <button class="btn btn--primary" type="submit" [disabled]="loading">
-        <span *ngIf="loading" class="spinner"></span>
+      <button class="btn btn--ghost" type="button" (click)="back()" [disabled]="loading()">Back</button>
+      <button class="btn btn--primary" type="submit" [disabled]="loading()">
+        <span *ngIf="loading()" class="spinner"></span>
         Create account
       </button>
     </div>
