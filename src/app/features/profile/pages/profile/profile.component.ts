@@ -6,10 +6,12 @@ import { AuthService } from '@core/services/auth.service';
 import { UsersService } from '@core/services/users.service';
 import { Post } from '@core/models/post.model';
 import { PostCardComponent } from '@features/feed/components/post-card/post-card.component';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { TranslationService } from '@core/services/translation.service';
 
 @Component({
   selector: 'app-profile',
-  imports: [NgIf, NgFor, NgClass, RouterLink, PostCardComponent],
+  imports: [NgIf, NgFor, NgClass, RouterLink, PostCardComponent, TranslatePipe],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -24,7 +26,11 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   loadingPosts = signal(true);
   loadingSaved = signal(false);
 
-  days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  days = computed(() =>
+    this.translations.language() === 'ar'
+      ? ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  );
 
  
   cards = computed(() => {
@@ -50,11 +56,13 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private usersService: UsersService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private translations: TranslationService
   ) {
    
     effect(() => {
       this.myPosts();
+      this.days();
       this.updateChart();
     });
   }
@@ -94,11 +102,11 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chart = new Chart(this.chartCanvas().nativeElement, {
       type: 'line',
       data: {
-        labels: this.days,
+        labels: this.days(),
         datasets: [
-          { label: 'Likes', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#e11d48', tension: 0.4 },
-          { label: 'Comments', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#38bdf8', tension: 0.4 },
-          { label: 'Shares', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#a78bfa', tension: 0.4 },
+          { label: this.translations.translate('Likes'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#e11d48', tension: 0.4 },
+          { label: this.translations.translate('Comments'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#38bdf8', tension: 0.4 },
+          { label: this.translations.translate('Shares'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#a78bfa', tension: 0.4 },
         ],
       },
       options: {
@@ -187,6 +195,11 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.chart) {
       return;
     }
+
+    this.chart.data.labels = this.days();
+    this.chart.data.datasets[0].label = this.translations.translate('Likes');
+    this.chart.data.datasets[1].label = this.translations.translate('Comments');
+    this.chart.data.datasets[2].label = this.translations.translate('Shares');
 
     const likes = [0, 0, 0, 0, 0, 0, 0];
     const comments = [0, 0, 0, 0, 0, 0, 0];

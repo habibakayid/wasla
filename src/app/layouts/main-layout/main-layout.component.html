@@ -8,7 +8,7 @@
     
       <div class="h-12 flex items-center">
         <app-brand *ngIf="!collapsed()" />
-        <a *ngIf="collapsed()" routerLink="/" class="mx-auto text-2xl font-extrabold text-brand dark:text-rose" aria-label="Wasla home">W</a>
+        <a *ngIf="collapsed()" routerLink="/" class="mx-auto text-2xl font-extrabold text-brand dark:text-rose" [attr.aria-label]="'Wasla home' | t">W</a>
       </div>
 
      
@@ -16,7 +16,7 @@
               class="mt-2 mb-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-rose"
               [ngClass]="collapsed() ? 'justify-center' : ''">
         <i class="fa-solid" [class.fa-angles-right]="collapsed()" [class.fa-angles-left]="!collapsed()"></i>
-        <span *ngIf="!collapsed()">Collapse Sidebar</span>
+        <span *ngIf="!collapsed()">{{ 'Collapse Sidebar' | t }}</span>
       </button>
 
      
@@ -34,15 +34,15 @@
           <div class="grid grid-cols-3 gap-2 text-center mt-4 pt-3 border-t border-gray-200 dark:border-neutral-700">
             <div>
               <p class="font-bold">{{ profile()?.postsCount || 0 }}</p>
-              <p class="text-xs text-gray-500">Posts</p>
+              <p class="text-xs text-gray-500">{{ 'Posts' | t }}</p>
             </div>
             <div>
               <p class="font-bold">{{ profile()?.followersCount || 0 }}</p>
-              <p class="text-xs text-gray-500">Followers</p>
+              <p class="text-xs text-gray-500">{{ 'Followers' | t }}</p>
             </div>
             <div>
               <p class="font-bold">{{ profile()?.bookmarksCount || 0 }}</p>
-              <p class="text-xs text-gray-500">Saved</p>
+              <p class="text-xs text-gray-500">{{ 'Saved' | t }}</p>
             </div>
           </div>
         </div>
@@ -59,18 +59,18 @@
            [routerLinkActiveOptions]="{ exact: l.exact }"
            class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800"
            [ngClass]="collapsed() ? 'justify-center px-0' : ''"
-           [attr.title]="l.label">
+           [attr.title]="l.label | t">
           <i class="fa-solid w-5 text-center text-base" [ngClass]="l.icon"></i>
-          <span *ngIf="!collapsed()">{{ l.label }}</span>
+          <span *ngIf="!collapsed()">{{ l.label | t }}</span>
         </a>
       </nav>
 
     
       <button type="button" (click)="logout()"
               class="mt-auto flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
-              [ngClass]="collapsed() ? 'justify-center px-0' : ''" title="Log out">
+              [ngClass]="collapsed() ? 'justify-center px-0' : ''" [attr.title]="'Log out' | t">
         <i class="fa-solid fa-right-from-bracket w-5 text-center text-base"></i>
-        <span *ngIf="!collapsed()">Log out</span>
+        <span *ngIf="!collapsed()">{{ 'Log out' | t }}</span>
       </button>
     </aside>
 
@@ -91,17 +91,19 @@
             </div>
             <input type="search"
                    class="block w-full p-3 ps-11 bg-white dark:bg-neutral-800 border-2 border-gold/60 text-sm rounded-full focus:ring-gold focus:border-gold"
-                   placeholder="Search wasla..." />
+                   [placeholder]="'Search wasla...' | t" />
           </div>
           <div class="flex-1 sm:hidden"></div>
 
+          <app-language-switcher />
+
           <button type="button" (click)="toggleTheme()"
-                  class="p-2 rounded-full bg-gray-100 dark:bg-neutral-700" aria-label="Toggle dark mode">
+                  class="p-2 rounded-full bg-gray-100 dark:bg-neutral-700" [attr.aria-label]="'Toggle dark mode' | t">
             <i *ngIf="theme.isDark()" class="fa-solid fa-sun"></i>
             <i *ngIf="!theme.isDark()" class="fa-solid fa-moon"></i>
           </button>
 
-          <a routerLink="/notifications" class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700" aria-label="Notifications">
+          <a routerLink="/notifications" class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700" [attr.aria-label]="'Notifications' | t">
             <i class="fa-regular fa-bell text-lg"></i>
             <span *ngIf="notificationsService.unreadCount() > 0"
                   class="absolute -top-1 -end-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-rose rounded-full">
@@ -109,7 +111,7 @@
             </span>
           </a>
 
-          <a routerLink="/profile" *ngIf="auth.user() as user" aria-label="My profile">
+          <a routerLink="/profile" *ngIf="auth.user() as user" [attr.aria-label]="'My profile' | t">
             <img [src]="user.photo" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-brand bg-brand" />
           </a>
         </div>
@@ -124,15 +126,15 @@
         <aside class="hidden xl:block">
           <div class="sticky top-24 space-y-4">
             <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
-              <h2 class="font-semibold mb-3">Recent Activity</h2>
-              <p *ngIf="recent().length === 0" class="text-sm text-gray-500">No recent activity.</p>
+              <h2 class="font-semibold mb-3">{{ 'Recent Activity' | t }}</h2>
+              <p *ngIf="recent().length === 0" class="text-sm text-gray-500">{{ 'No recent activity.' | t }}</p>
               <ul class="space-y-3">
                 <li *ngFor="let n of recent()" class="flex items-start gap-3">
                  
                   <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-8 h-8 rounded-full object-cover" />
                   <div class="text-sm min-w-0">
                     <p class="truncate">{{ n.message || n.type }}</p>
-                    <p class="text-xs text-gray-500">{{ n.createdAt | date: 'short' }}</p>
+                    <p class="text-xs text-gray-500">{{ n.createdAt | localizedDate: 'short' }}</p>
                   </div>
                 </li>
               </ul>
@@ -147,13 +149,13 @@
   
   <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
     <div class="grid grid-cols-5 h-16 text-center text-xs">
-      <a routerLink="/" class="flex flex-col items-center justify-center"><i class="fa-solid fa-house text-lg"></i><span>Home</span></a>
-      <a routerLink="/explore" class="flex flex-col items-center justify-center"><i class="fa-solid fa-compass text-lg"></i><span>Explore</span></a>
+      <a routerLink="/" class="flex flex-col items-center justify-center"><i class="fa-solid fa-house text-lg"></i><span>{{ 'Home' | t }}</span></a>
+      <a routerLink="/explore" class="flex flex-col items-center justify-center"><i class="fa-solid fa-compass text-lg"></i><span>{{ 'Explore' | t }}</span></a>
       <a routerLink="/" class="flex flex-col items-center justify-center">
         <span class="w-10 h-10 rounded-full bg-brand text-white text-2xl flex items-center justify-center">+</span>
       </a>
-      <a routerLink="/notifications" class="flex flex-col items-center justify-center"><i class="fa-solid fa-bell text-lg"></i><span>Alerts</span></a>
-      <a routerLink="/profile" class="flex flex-col items-center justify-center"><i class="fa-solid fa-user text-lg"></i><span>Profile</span></a>
+      <a routerLink="/notifications" class="flex flex-col items-center justify-center"><i class="fa-solid fa-bell text-lg"></i><span>{{ 'Alerts' | t }}</span></a>
+      <a routerLink="/profile" class="flex flex-col items-center justify-center"><i class="fa-solid fa-user text-lg"></i><span>{{ 'Profile' | t }}</span></a>
     </div>
   </nav>
 </div>

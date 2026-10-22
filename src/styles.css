@@ -48,6 +48,9 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
+html[lang='ar'] {
+  font-family: "Cairo", sans-serif;
+}
 
 .auth-page {
   min-height: 100vh;

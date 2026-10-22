@@ -1,11 +1,11 @@
-<h1 class="text-xl font-extrabold mb-4">Explore</h1>
+<h1 class="text-xl font-extrabold mb-4">{{ 'Explore' | t }}</h1>
 
-<p *ngIf="loading() && posts().length === 0" class="text-sm text-gray-500">Loading...</p>
+<p *ngIf="loading() && posts().length === 0" class="text-sm text-gray-500">{{ 'Loading...' | t }}</p>
 
 <div *ngIf="!loading() && posts().length === 0"
      class="text-center bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-10">
   <p class="text-3xl mb-2 text-gray-400"><i class="fa-regular fa-compass"></i></p>
-  <p class="font-semibold">Nothing to explore yet</p>
+  <p class="font-semibold">{{ 'Nothing to explore yet' | t }}</p>
 </div>
 
 <div class="space-y-4">
@@ -15,6 +15,6 @@
 <div *ngIf="hasMore() && posts().length > 0" class="text-center mt-6">
   <button type="button" (click)="loadMore()" [disabled]="loading()"
           class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-50">
-    {{ loading() ? 'Loading...' : 'Load more' }}
+    {{ (loading() ? 'Loading...' : 'Load more') | t }}
   </button>
 </div>

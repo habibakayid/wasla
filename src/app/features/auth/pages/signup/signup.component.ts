@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 import { UsersService } from '@core/services/users.service';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 
 function minAge13(control: AbstractControl): ValidationErrors | null {
@@ -19,7 +20,7 @@ function minAge13(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-signup',
-  imports: [NgIf, ReactiveFormsModule, RouterLink],
+  imports: [NgIf, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './signup.component.html',
 })
 export class SignupComponent {

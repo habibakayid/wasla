@@ -4,11 +4,12 @@ import { NgFor, NgIf } from '@angular/common';
 import { PostsService } from '@core/services/posts.service';
 import { Post } from '@core/models/post.model';
 import { PostCardComponent } from '../../components/post-card/post-card.component';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 
 @Component({
   selector: 'app-explore',
-  imports: [NgFor, NgIf, PostCardComponent],
+  imports: [NgFor, NgIf, PostCardComponent, TranslatePipe],
   templateUrl: './explore.component.html',
 })
 export class ExploreComponent implements OnInit {

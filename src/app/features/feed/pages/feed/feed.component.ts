@@ -6,10 +6,11 @@ import { Post } from '@core/models/post.model';
 import { CreatePostComponent } from '../../components/create-post/create-post.component';
 import { PostCardComponent } from '../../components/post-card/post-card.component';
 import { WhoToFollowComponent } from '../../components/who-to-follow/who-to-follow.component';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-feed',
-  imports: [NgFor, NgIf, NgClass, WhoToFollowComponent, CreatePostComponent, PostCardComponent],
+  imports: [NgFor, NgIf, NgClass, WhoToFollowComponent, CreatePostComponent, PostCardComponent, TranslatePipe],
   templateUrl: './feed.component.html',
 })
 export class FeedComponent implements OnInit {

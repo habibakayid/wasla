@@ -10,10 +10,11 @@ import { Post } from '@core/models/post.model';
 import { Comment } from '@core/models/comment.model';
 import { PostCardComponent } from '@features/feed/components/post-card/post-card.component';
 import { CommentItemComponent } from '../../components/comment-item/comment-item.component';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-post-details',
-  imports: [NgIf, NgFor, FormsModule, RouterLink, PostCardComponent, CommentItemComponent],
+  imports: [NgIf, NgFor, FormsModule, RouterLink, PostCardComponent, CommentItemComponent, TranslatePipe],
   templateUrl: './post-details.component.html',
 })
 export class PostDetailsComponent implements OnInit {

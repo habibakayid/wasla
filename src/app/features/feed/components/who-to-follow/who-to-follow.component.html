@@ -1,6 +1,6 @@
 <div *ngIf="users().length > 0"
      class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4 mb-4">
-  <h2 class="font-semibold mb-3">Who to follow</h2>
+  <h2 class="font-semibold mb-3">{{ 'Who to follow' | t }}</h2>
 
   <div class="flex gap-4 overflow-x-auto pb-1">
     <button *ngFor="let user of users()" type="button" (click)="follow(user)"

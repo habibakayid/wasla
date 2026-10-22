@@ -6,10 +6,11 @@ import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
 import { ToastService } from '@core/services/toast.service';
 import { UsersService } from '@core/services/users.service';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-settings',
-  imports: [NgIf, ReactiveFormsModule],
+  imports: [NgIf, ReactiveFormsModule, TranslatePipe],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {

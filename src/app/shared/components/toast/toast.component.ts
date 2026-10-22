@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ToastService } from '@core/services/toast.service';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass],
+  imports: [NgFor, NgIf, NgClass, TranslatePipe],
   template: `
     <div class="fixed bottom-20 lg:bottom-6 inset-x-4 z-50 flex flex-col items-center gap-2 pointer-events-none">
 
@@ -43,7 +44,7 @@ import { ToastService } from '@core/services/toast.service';
           type="button"
           (click)="toastService.remove(t.id)"
           class="ms-3 text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl leading-none"
-          aria-label="Close"
+          [attr.aria-label]="'Close' | t"
         >
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>

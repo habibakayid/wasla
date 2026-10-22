@@ -6,23 +6,23 @@
     <div class="flex-1 min-w-0">
       <p class="font-semibold truncate">
         {{ post().user.name }}
-        <span *ngIf="post().isShare" class="text-xs font-normal text-gray-500">shared a post</span>
+        <span *ngIf="post().isShare" class="text-xs font-normal text-gray-500">{{ 'shared a post' | t }}</span>
       </p>
       <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-        &#64;{{ post().user.username }} · {{ post().createdAt | date: 'medium' }}
+        &#64;{{ post().user.username }} · {{ post().createdAt | localizedDate: 'medium' }}
       </p>
     </div>
 
    
     <div *ngIf="isMine() && !isEditing()" class="relative">
       <button type="button" (click)="menuOpen.set(!menuOpen())"
-              class="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-700" aria-label="More"><i class="fa-solid fa-ellipsis"></i></button>
+              class="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-700" [attr.aria-label]="'More' | t"><i class="fa-solid fa-ellipsis"></i></button>
       <div *ngIf="menuOpen()"
            class="absolute end-0 mt-1 w-32 z-10 bg-white dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-lg shadow text-sm">
         <button type="button" (click)="startEdit(); menuOpen.set(false)"
-                class="block w-full text-start px-3 py-2 hover:bg-gray-100 dark:hover:bg-neutral-600">Edit</button>
+                class="block w-full text-start px-3 py-2 hover:bg-gray-100 dark:hover:bg-neutral-600">{{ 'Edit' | t }}</button>
         <button type="button" (click)="deletePost(); menuOpen.set(false)"
-                class="block w-full text-start px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-neutral-600">Delete</button>
+                class="block w-full text-start px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-neutral-600">{{ 'Delete' | t }}</button>
       </div>
     </div>
   </div>
@@ -38,8 +38,8 @@
     <textarea [(ngModel)]="editText" rows="3"
               class="block w-full text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"></textarea>
     <div class="flex gap-2 mt-2">
-      <button type="button" (click)="saveEdit()" class="text-xs text-white bg-brand hover:bg-brand-strong px-3 py-1.5 rounded-lg">Save</button>
-      <button type="button" (click)="cancelEdit()" class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-neutral-600">Cancel</button>
+      <button type="button" (click)="saveEdit()" class="text-xs text-white bg-brand hover:bg-brand-strong px-3 py-1.5 rounded-lg">{{ 'Save' | t }}</button>
+      <button type="button" (click)="cancelEdit()" class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-neutral-600">{{ 'Cancel' | t }}</button>
     </div>
   </div>
 
@@ -66,27 +66,27 @@
             class="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
             [ngClass]="isLiked() ? 'text-rose' : 'text-gray-600 dark:text-gray-300'">
       <i class="fa-heart" [ngClass]="isLiked() ? 'fa-solid' : 'fa-regular'"></i>
-      {{ post().likesCount }} Likes
+      {{ post().likesCount }} {{ 'Likes' | t }}
     </button>
 
    
     <a [routerLink]="['/posts', post()._id]"
        class="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-gray-600 dark:text-gray-300">
-      <i class="fa-regular fa-comment"></i> {{ post().commentsCount }} Comments
+      <i class="fa-regular fa-comment"></i> {{ post().commentsCount }} {{ 'Comments' | t }}
     </a>
 
     
     <button type="button" (click)="share()"
             class="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-gray-600 dark:text-gray-300">
-      <i class="fa-solid fa-retweet"></i> {{ post().sharesCount }} Share
+      <i class="fa-solid fa-retweet"></i> {{ post().sharesCount }} {{ 'Share' | t }}
     </button>
 
    
     <button type="button" (click)="toggleBookmark()"
             class="ms-auto flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
-            [ngClass]="post().bookmarked ? 'text-gold' : 'text-gray-600 dark:text-gray-300'" aria-label="Bookmark">
+            [ngClass]="post().bookmarked ? 'text-gold' : 'text-gray-600 dark:text-gray-300'" [attr.aria-label]="'Bookmark' | t">
       <i class="fa-bookmark" [ngClass]="post().bookmarked ? 'fa-solid' : 'fa-regular'"></i>
-      <span class="hidden sm:inline">Bookmark</span>
+      <span class="hidden sm:inline">{{ 'Bookmark' | t }}</span>
     </button>
   </div>
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { NgClass, NgFor, NgIf, DatePipe } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
@@ -8,10 +8,13 @@ import { UsersService } from '@core/services/users.service';
 import { NotificationsService } from '@core/services/notifications.service';
 import { BrandComponent } from '@shared/components/brand/brand.component';
 import { SuggestionsComponent } from '@features/feed/components/suggestions/suggestions.component';
+import { LanguageSwitcherComponent } from '@shared/components/language-switcher/language-switcher.component';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [NgFor, NgIf, NgClass, DatePipe, RouterOutlet, RouterLink, RouterLinkActive, BrandComponent, SuggestionsComponent],
+  imports: [NgFor, NgIf, NgClass, RouterOutlet, RouterLink, RouterLinkActive, BrandComponent, SuggestionsComponent, LanguageSwitcherComponent, TranslatePipe, LocalizedDatePipe],
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit {

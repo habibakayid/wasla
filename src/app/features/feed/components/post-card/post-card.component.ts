@@ -1,5 +1,5 @@
 import { Component, computed, model, output, signal } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -7,10 +7,12 @@ import { AuthService } from '@core/services/auth.service';
 import { PostsService } from '@core/services/posts.service';
 import { ToastService } from '@core/services/toast.service';
 import { Post } from '@core/models/post.model';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
 @Component({
   selector: 'app-post-card',
-  imports: [NgIf, NgFor, NgClass, DatePipe, FormsModule, RouterLink],
+  imports: [NgIf, NgFor, NgClass, FormsModule, RouterLink, TranslatePipe, LocalizedDatePipe],
   templateUrl: './post-card.component.html',
 })
 export class PostCardComponent {

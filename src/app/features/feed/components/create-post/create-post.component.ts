@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
 import { PostsService } from '@core/services/posts.service';
 import { ToastService } from '@core/services/toast.service';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-create-post',
-  imports: [NgIf, FormsModule],
+  imports: [NgIf, FormsModule, TranslatePipe],
   templateUrl: './create-post.component.html',
 })
 export class CreatePostComponent {

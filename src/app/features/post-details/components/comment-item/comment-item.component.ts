@@ -1,15 +1,17 @@
 import { Component, computed, input, model, output, signal } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '@core/services/auth.service';
 import { CommentsService } from '@core/services/comments.service';
 import { ToastService } from '@core/services/toast.service';
 import { Comment } from '@core/models/comment.model';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
 @Component({
   selector: 'app-comment-item',
-  imports: [NgIf, NgFor, NgClass, DatePipe, FormsModule],
+  imports: [NgIf, NgFor, NgClass, FormsModule, TranslatePipe, LocalizedDatePipe],
   templateUrl: './comment-item.component.html',
 })
 export class CommentItemComponent {

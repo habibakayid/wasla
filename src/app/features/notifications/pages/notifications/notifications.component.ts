@@ -1,12 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
 import { NotificationsService } from '@core/services/notifications.service';
 
 @Component({
   selector: 'app-notifications',
-  imports: [NgFor, NgIf, NgClass, DatePipe],
+  imports: [NgFor, NgIf, NgClass, TranslatePipe, LocalizedDatePipe],
   templateUrl: './notifications.component.html',
 })
 export class NotificationsComponent implements OnInit {

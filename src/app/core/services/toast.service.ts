@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { TranslationService } from './translation.service';
 
 export interface Toast {
   id: number;
@@ -12,6 +13,8 @@ export interface Toast {
 export class ToastService {
   toasts = signal<Toast[]>([]);
   private nextId = 1;
+
+  constructor(private translations: TranslationService) {}
 
   success(message: string, actionLabel?: string, action?: () => void) {
     this.show('success', message, actionLabel, action);
@@ -41,7 +44,16 @@ export class ToastService {
     const id = this.nextId;
     this.nextId = this.nextId + 1;
 
-    this.toasts.update((list) => [...list, { id: id, type: type, message: message, actionLabel: actionLabel, action: action }]);
+    this.toasts.update((list) => [
+      ...list,
+      {
+        id,
+        type,
+        message: this.translations.translate(message),
+        actionLabel: actionLabel ? this.translations.translate(actionLabel) : undefined,
+        action,
+      },
+    ]);
 
     
     const time = actionLabel ? 6000 : 4000;
