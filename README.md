@@ -1,189 +1,149 @@
-#  WASLA (وصلة)
-### Social Connection & Analytics Web App
+# WASLA (وَصلة)
 
-A modern social networking and engagement platform built with **Angular Standalone Components, Signals, and Lazy Loading**, featuring a distinctive Burgundy & Cream visual identity.
+### Social Connection Web App
 
----
-
-##  About the Project
-
-**WASLA (وصلة)** is a modern, high-performance social networking platform designed for developers and creators.
-
-The application focuses on smooth user experiences, instant interactions through Optimistic UI, and client-side engagement analytics that track likes, comments, and saved bookmarks.
-
-Built with modern Angular architecture, WASLA combines responsive design, reusable components, authentication, and personalized user experiences.
+A modern social network built with **Angular 21 (Standalone Components, Signals, Lazy Loading)** on top of the **Route Posts API**, with a Burgundy & Cream identity and full **Arabic / English (RTL / LTR)** support.
 
 ---
 
-## Key Features
+## About the Project
 
-###  1. Core Features
-
-- **Authentication System **
-  - Sign in and two-step sign-up process.
-  - Reactive Forms with validation.
-  - Email validation and password matching.
-
-
-- **Home Feed**
-  - Three-column desktop layout.
-  - Interactive "Who to Follow" section.
-  - Feed filters: All, Following, and Me.
-  - Inline post composer.
-  - Infinite scrolling.
-
-- **Post Interactions**
-  - Like and bookmark posts instantly.
-  - Optimistic UI with automatic rollback on errors.
-
-- **Comments & Replies**
-  - Dedicated post details page ).
-  - Nested comment replies.
-  - Comment likes.
-
-- **Notifications**
-  - Automatic polling for new notifications.
-  - Unread notification badges.
-  - Mark all notifications as read.
-  - Polling optimisation using the Page Visibility API.
-
-- **User Profile & Analytics**
-  - Profile cover and avatar upload.
-  - User posts and saved bookmarks.
-  - Engagement analytics for likes, comments, and bookmarks.
-  - Dynamic analytics visualisation.
-
-- **Settings & Preferences**
-  - Password change.
-  - Theme preferences.
-  - Internationalisation (i18n) support.
-
-###  2. Advanced Features
-
-- **Theme Switching:** Light, Dark, and Midnight Yellow accent themes.
-- **RTL / LTR Support:** Flexible layouts using CSS Logical Properties.
-- **Smart Polling:** Automatically pauses and resumes polling when the browser tab becomes hidden or visible.
-- **Draft Autosave:** Automatically saves post drafts using `localStorage`.
-- **Responsive Design:** Adaptable layouts for desktop, tablet, and mobile devices.
+**WASLA (وصلة)** lets people share moments, follow each other, and join conversations. It focuses on a smooth experience: optimistic UI, infinite scrolling, a split-screen auth layout, and a responsive three-column home.
 
 ---
 
-##  Tech Stack
+## Features
 
-| Technology | Purpose |
+### Authentication
+- Split-screen layout: platform description on one side, the form on the other (description is hidden on small screens).
+- Sign in and two-step sign-up with Reactive Forms validation.
+- Auth guard and HTTP interceptor (token handling and error toasts).
+
+### Home Feed
+- All posts with infinite scrolling.
+- Filters: All, Following, Me.
+- Inline post composer with image upload and privacy selector.
+- "Who to follow" suggestions.
+
+### Posts
+- Create, update, and delete posts.
+- Like, bookmark, and share.
+- Post likes list page.
+
+### Comments & Replies
+- Post details page with all comments.
+- Create, update, and delete comments.
+- Nested replies and comment likes.
+
+### Profile
+- Own profile with followers, following, and saved posts.
+- Other users' profiles with follow / unfollow.
+- Settings: change password.
+
+### Notifications
+- Unread count badge with polling.
+- All / Unread tabs.
+- Mark all as read.
+- Click a notification to open the post or the user's profile.
+
+### Search
+- Search posts and people.
+
+### Internationalization
+- English and Arabic with automatic RTL.
+- Language saved in `localStorage` (`wasla-language`).
+- Custom `TranslationService` and `t` pipe.
+
+---
+
+## Tech Stack
+
+| Area | Technology |
 |---|---|
-| Angular 20+ | Frontend framework |
-| Standalone Components | Modular application architecture |
-| Angular Signals | Reactive state management |
-| TypeScript | Type-safe development |
-| Angular Router | Navigation and lazy loading |
-| Reactive Forms | Form handling and validation |
-| Functional Interceptors | JWT injection and HTTP error handling |
-| Chart.js | Analytics visualization |
-| Playwright | End-to-end testing |
-| Angular PWA | Progressive Web App support |
-| localStorage | Theme preferences and draft persistence |
+| Framework | Angular 21 (standalone, signals) |
+| Styling | Tailwind CSS v4, Flowbite |
+| Icons | Font Awesome |
+| Charts | Chart.js |
+| State / async | RxJS + Signals |
+| Tests | Vitest |
+
 
 ---
 
+## Project Structure
 
+```
+src/app/
+├── core/        # services, guards, interceptors, models
+├── shared/      # reusable components, pipes, directives
+├── layouts/     # auth-layout, main-layout
+└── features/
+    ├── auth/
+    ├── feed/
+    ├── post-details/
+    ├── post-likes/
+    ├── profile/
+    ├── notifications/
+    ├── search/
+    ├── settings/
+    └── not-found/
+```
 
-
-##  Authentication & HTTP Handling
-
-- Route protection using Auth and Guest Guards.
-- JWT token injection through functional HTTP interceptors.
-- Automatic handling of `401 Unauthorized` responses.
-- Redirects to the sign-in page with `returnUrl` support.
-- Reactive Forms for authentication and validation.
+Path aliases: `@core`, `@shared`, `@features`, `@layouts`.
 
 ---
 
-##  Getting Started
+## Getting Started
 
 ### Prerequisites
+- Node.js 20+
+- npm 11
 
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/) — Version 18 or later recommended.
-- npm — Included with Node.js.
-- Angular CLI.
-
-### 1. Clone the Repository
+### Install and run
 
 ```bash
-git clone https://github.com/your-username/wasla-app.git
-```
-
-### 2. Navigate to the Project Directory
-
-```bash
-cd wasla-app
-```
-
-### 3. Install Dependencies
-
-```bash
+git clone https://github.com/habibakayid/wasla.git
+cd wasla
 npm install
+npm start
 ```
 
-### 4. Start the Development Server
+Open **http://localhost:4200**.
 
-```bash
-ng serve
-```
+### Scripts
 
-### 5. Open the Application
-
-Navigate to:
-
-```text
-http://localhost:4200
-```
+| Command | What it does |
+|---|---|
+| `npm start` | Dev server |
+| `npm run build` | Production build |
+| `npm run watch` | Build in watch mode |
+| `npm test` | Run unit tests |
 
 ---
 
-##  Testing
+## API
 
-WASLA is designed to support unit testing and end-to-end testing.
+All requests go to `https://route-posts.routemisr.com`. Responses follow this shape:
 
-**Unit Tests — Jest**
-
-```bash
-npm test
+```json
+{ "success": true, "message": "success", "data": {}, "meta": {} }
 ```
 
-**End-to-End Tests — Playwright**
-
-```bash
-npx playwright test
-```
-
-*Note: Ensure that Jest and Playwright are configured in the project and that the corresponding scripts or dependencies are available before running these commands.*
+Main endpoints used: `/users/signup`, `/users/signin`, `/users/profile-data`, `/users/change-password`, `/posts`, `/posts/:id/comments`, `/notifications`, `/notifications/unread-count`, `/users/suggestions`.
 
 ---
 
-##  Progressive Web App
+## Author
 
-WASLA includes planned PWA support through `@angular/pwa`, enabling progressive web application capabilities where configured.
-
----
-
-##  Planned Improvements
-
-- Expand social discovery and recommendation features.
-- Improve analytics dashboards.
-- Enhance accessibility and keyboard navigation.
-- Expand automated test coverage.
-- Optimize performance and offline capabilities.
+**Habiba Kayid**: Computer Science & AI, Helwan University.
+GitHub: [@habibakayid](https://github.com/habibakayid)
 
 ---
 
-##  License
+## License
 
-This project is developed as an advanced portfolio project showcasing modern Angular development practices, component architecture, reactive state management, and user-focused interface design.
+Built for learning and portfolio purposes.
 
----
 
 <p align="center">
   Built By Habiba Kayid ❤️
