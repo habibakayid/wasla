@@ -1,10 +1,10 @@
 <form (ngSubmit)="submit()" class="mb-4">
-  <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-sm p-4">
+  <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-sm p-4 transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
 
     <div class="flex items-start gap-3">
-      <img *ngIf="auth.user() as user" [src]="user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
-      <textarea name="body" [(ngModel)]="body" rows="2"
-                class="block flex-1 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-brand focus:border-brand placeholder:text-gray-500 resize-none"
+      <img *ngIf="auth.user() as user" [src]="user.photo" alt="" class="w-11 h-11 rounded-full object-cover shrink-0" />
+      <textarea name="body" [(ngModel)]="body" rows="4"
+                class="block flex-1 min-h-[110px] max-h-[360px] text-base leading-relaxed bg-transparent border-0 p-2 focus:ring-0 focus:outline-none placeholder:text-gray-400 resize-none [field-sizing:content]"
                 [placeholder]="'What\'s on your mind?' | t"></textarea>
     </div>
 
@@ -14,13 +14,13 @@
               class="absolute top-2 end-2 w-7 h-7 rounded-full bg-black/60 text-white" [attr.aria-label]="'Remove image' | t">&times;</button>
     </div>
 
-    <div class="flex items-center justify-between mt-3">
+    <div class="flex items-center justify-between mt-2 pt-3 border-t border-gray-100 dark:border-neutral-700">
       <div class="flex items-center gap-2">
         <label class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700">
           <i class="fa-regular fa-image"></i> {{ 'Photo' | t }}
           <input type="file" accept="image/*" class="hidden" (change)="onFileChange($event)" />
         </label>
-       
+
         <select name="privacy" [(ngModel)]="privacy" [attr.aria-label]="'Privacy' | t"
                 class="text-xs py-1.5 ps-2 pe-8 rounded-full bg-gray-100 dark:bg-neutral-700 border-0 focus:ring-brand">
           <option *ngFor="let o of privacyOptions" [value]="o.value">{{ o.label | t }}</option>
