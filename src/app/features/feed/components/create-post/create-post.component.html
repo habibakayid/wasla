@@ -5,7 +5,7 @@
       <img *ngIf="auth.user() as user" [src]="user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
       <textarea name="body" [(ngModel)]="body" rows="2"
                 class="block flex-1 text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-brand focus:border-brand placeholder:text-gray-500 resize-none"
-                [placeholder]="'What’s on your mind?' | t"></textarea>
+                [placeholder]="'What\'s on your mind?' | t"></textarea>
     </div>
 
     <div *ngIf="imagePreview()" class="relative mt-3">
@@ -20,10 +20,10 @@
           <i class="fa-regular fa-image"></i> {{ 'Photo' | t }}
           <input type="file" accept="image/*" class="hidden" (change)="onFileChange($event)" />
         </label>
-        
-        <select name="privacy" [(ngModel)]="privacy"
+       
+        <select name="privacy" [(ngModel)]="privacy" [attr.aria-label]="'Privacy' | t"
                 class="text-xs py-1.5 ps-2 pe-8 rounded-full bg-gray-100 dark:bg-neutral-700 border-0 focus:ring-brand">
-          <option value="public">{{ 'Public' | t }}</option>
+          <option *ngFor="let o of privacyOptions" [value]="o.value">{{ o.label | t }}</option>
         </select>
       </div>
 

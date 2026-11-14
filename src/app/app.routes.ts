@@ -42,6 +42,17 @@ export const routes: Routes = [
         loadComponent: () => import('@features/feed/pages/explore/explore.component').then((m) => m.ExploreComponent),
       },
       {
+        path: 'search',
+        title: 'Search · Wasla',
+        loadComponent: () => import('@features/search/pages/search/search.component').then((m) => m.SearchComponent),
+      },
+      {
+        path: 'posts/:id/likes',
+        title: 'Likes · Wasla',
+        loadComponent: () =>
+          import('@features/post-likes/pages/post-likes/post-likes.component').then((m) => m.PostLikesComponent),
+      },
+      {
         path: 'posts/:id',
         title: 'Post · Wasla',
         loadComponent: () =>
@@ -51,6 +62,12 @@ export const routes: Routes = [
         path: 'profile',
         title: 'Profile · Wasla',
         loadComponent: () => import('@features/profile/pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+            {
+        path: 'profile/:userId',
+        title: 'Profile · Wasla',
+        loadComponent: () =>
+          import('@features/profile/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
       },
       {
         path: 'notifications',
@@ -67,9 +84,9 @@ export const routes: Routes = [
   },
 
  
-  // {
-  //   path: '**',
-  //   title: 'Not found · Wasla',
-  //   loadComponent: () => import('@features/not-found/pages/not-found/not-found.component').then((m) => m.NotFoundComponent),
-  // },
+    {
+    path: '**',
+    title: 'Not found · Wasla',
+    loadComponent: () => import('@features/not-found/pages/not-found/not-found.component').then((m) => m.NotFoundComponent),
+  },
 ];

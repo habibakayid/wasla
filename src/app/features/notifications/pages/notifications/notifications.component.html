@@ -3,7 +3,7 @@
   <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-neutral-700">
     <h1 class="font-extrabold text-lg">{{ 'Notifications' | t }}</h1>
     <button type="button" (click)="markAllRead()" class="text-sm text-brand dark:text-rose hover:underline">
-      {{ 'Mark all as read' | t }}
+      <i class="fa-solid fa-check-double"></i> {{ 'Mark all as read' | t }}
     </button>
   </div>
 
@@ -22,7 +22,7 @@
 
   <div *ngIf="!loading() && notifications().length === 0" class="text-center py-12">
     <p class="text-3xl mb-2 text-gray-400"><i class="fa-regular fa-bell"></i></p>
-    <p class="font-semibold">{{ "You're all caught up" | t }}</p>
+    <p class="font-semibold">{{ 'You\'re all caught up' | t }}</p>
   </div>
 
   <ul>
@@ -31,9 +31,9 @@
               class="w-full flex items-start gap-3 text-start px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 border-t border-gray-100 dark:border-neutral-700"
               [ngClass]="n.isRead ? '' : 'bg-rose/5'">
         <!-- sender / message / createdAt تخمين لحد ما نشوف إشعار حقيقي -->
-        <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
+        <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-10 h-10 rounded-full object-cover bg-brand" />
         <div class="flex-1 min-w-0 text-sm">
-          <p><span class="font-semibold">{{ n.sender?.name }}</span> {{ n.message || n.type }}</p>
+          <p><span class="font-semibold">{{ n.sender?.name }}</span> {{ text(n) }}</p>
           <p class="text-xs text-gray-500">{{ n.createdAt | localizedDate: 'medium' }}</p>
         </div>
         <span *ngIf="!n.isRead" class="mt-2 w-2.5 h-2.5 rounded-full bg-rose shrink-0"></span>
@@ -41,10 +41,9 @@
     </li>
   </ul>
 
-  <div *ngIf="hasMore() && notifications().length > 0" class="text-center p-4">
-    <button type="button" (click)="loadMore()" [disabled]="loading()"
-            class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 disabled:opacity-50">
-      {{ (loading() ? 'Loading...' : 'Load more') | t }}
-    </button>
-  </div>
+  <div [appInfiniteScroll]="hasMore() && !loading()" (reached)="loadMore()" class="h-4"></div>
+
+  <p *ngIf="loading() && notifications().length > 0" class="text-center text-sm text-gray-500 py-4">
+    <i class="fa-solid fa-spinner fa-spin"></i> {{ 'Loading...' | t }}
+  </p>
 </div>

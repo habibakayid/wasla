@@ -1,17 +1,19 @@
 import { Component, computed, input, model, output, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 import { CommentsService } from '@core/services/comments.service';
 import { ToastService } from '@core/services/toast.service';
 import { Comment } from '@core/models/comment.model';
+import { TranslationService } from '@core/services/translation.service';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
 import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
 @Component({
   selector: 'app-comment-item',
-  imports: [NgIf, NgFor, NgClass, FormsModule, TranslatePipe, LocalizedDatePipe],
+  imports: [NgIf, NgFor, NgClass, FormsModule, RouterLink, TranslatePipe, LocalizedDatePipe],
   templateUrl: './comment-item.component.html',
 })
 export class CommentItemComponent {
@@ -34,7 +36,7 @@ export class CommentItemComponent {
     return !!me && me._id === this.comment().commentCreator._id;
   });
 
-
+ 
   canDelete = computed(() => {
     const me = this.auth.user();
     return !!me && (me._id === this.comment().commentCreator._id || me._id === this.postOwnerId());
@@ -48,8 +50,15 @@ export class CommentItemComponent {
   constructor(
     private commentsService: CommentsService,
     private auth: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private translations: TranslationService
   ) {}
+
+  
+  profileLink(user: any): any[] {
+    const me = this.auth.user();
+    return me && user && me._id === user._id ? ['/profile'] : ['/profile', user && user._id];
+  }
 
   private setLiked(liked: boolean) {
     const me = this.auth.user();
@@ -68,6 +77,7 @@ export class CommentItemComponent {
     });
   }
 
+ 
   toggleLike() {
     const was = this.isLiked();
     this.setLiked(!was);
@@ -79,7 +89,7 @@ export class CommentItemComponent {
     });
   }
 
-  
+
   startEdit() {
     this.editText.set(this.comment().content);
     this.isEditing.set(true);
@@ -96,9 +106,9 @@ export class CommentItemComponent {
     });
   }
 
-  
+ 
   remove() {
-    if (!confirm('Delete this comment?')) {
+    if (!confirm(this.translations.translate('Delete this comment?'))) {
       return;
     }
     this.commentsService.deleteComment(this.postId(), this.comment()._id).subscribe({

@@ -1,5 +1,5 @@
 import { Component, output, signal } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '@core/services/auth.service';
@@ -9,15 +9,22 @@ import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-create-post',
-  imports: [NgIf, FormsModule, TranslatePipe],
+  imports: [NgIf, NgFor, FormsModule, TranslatePipe],
   templateUrl: './create-post.component.html',
 })
 export class CreatePostComponent {
-  
+
   created = output<void>();
 
   body = signal('');
-  privacy = signal('public'); 
+  privacy = signal('public');
+
+  
+  privacyOptions = [
+    { value: 'public', label: 'Public' },
+    { value: 'following', label: 'Followers' },
+    { value: 'only_me', label: 'Only me' },
+  ];
   imageFile = signal<File | null>(null);
   imagePreview = signal('');
   sending = signal(false);

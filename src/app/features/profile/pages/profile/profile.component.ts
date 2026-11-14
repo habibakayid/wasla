@@ -2,16 +2,20 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, computed, effe
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import Chart from 'chart.js/auto';
+
 import { AuthService } from '@core/services/auth.service';
 import { UsersService } from '@core/services/users.service';
 import { Post } from '@core/models/post.model';
-import { PostCardComponent } from '@features/feed/components/post-card/post-card.component';
-import { TranslatePipe } from '@shared/pipes/translate.pipe';
 import { TranslationService } from '@core/services/translation.service';
+import { privacyOf } from '@core/utils/privacy';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { InfiniteScrollDirective } from '@shared/directives/infinite-scroll.directive';
+import { PrivacyFilterComponent } from '@shared/components/privacy-filter/privacy-filter.component';
+import { PostCardComponent } from '@features/feed/components/post-card/post-card.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [NgIf, NgFor, NgClass, RouterLink, PostCardComponent, TranslatePipe],
+  imports: [NgIf, NgFor, NgClass, RouterLink, PostCardComponent, TranslatePipe, InfiniteScrollDirective, PrivacyFilterComponent],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -26,11 +30,22 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   loadingPosts = signal(true);
   loadingSaved = signal(false);
 
-  days = computed(() =>
-    this.translations.language() === 'ar'
-      ? ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت']
-      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  );
+ 
+  myPage = 1;
+  myLimit = 50;
+  myHasMore = signal(false);
+  myTotal = signal(0);
+  myPrivacy = signal('all');
+  visibleMyPosts = computed(() => {
+    const wanted = this.myPrivacy();
+    if (wanted === 'all') {
+      return this.myPosts();
+    }
+    return this.myPosts().filter((p) => privacyOf(p.privacy) === wanted);
+  });
+
+
+  days = computed(() => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => this.translations.translate(d)));
 
  
   cards = computed(() => {
@@ -47,9 +62,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     const total = likes + comments + shares;
 
     return [
-      { name: 'Likes', value: likes, pct: this.percent(likes, total), color: '#e11d48', text: 'text-rose-300' },
-      { name: 'Comments', value: comments, pct: this.percent(comments, total), color: '#38bdf8', text: 'text-sky-300' },
-      { name: 'Shares', value: shares, pct: this.percent(shares, total), color: '#a78bfa', text: 'text-violet-300' },
+      { name: this.translations.translate('Likes'), value: likes, pct: this.percent(likes, total), color: '#e11d48', text: 'text-rose-300' },
+      { name: this.translations.translate('Comments'), value: comments, pct: this.percent(comments, total), color: '#38bdf8', text: 'text-sky-300' },
+      { name: this.translations.translate('Shares'), value: shares, pct: this.percent(shares, total), color: '#a78bfa', text: 'text-violet-300' },
     ];
   });
 
@@ -59,16 +74,16 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private translations: TranslationService
   ) {
-   
+    
     effect(() => {
       this.myPosts();
-      this.days();
+      this.translations.language();
       this.updateChart();
     });
   }
 
   ngOnInit() {
-   
+    
     this.route.queryParamMap.subscribe((params) => {
       const tab = params.get('tab');
       if (tab === 'saved' || tab === 'posts' || tab === 'analytics') {
@@ -78,24 +93,46 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.usersService.getMyProfile().subscribe({
       next: (res) => {
-        this.profile.set(res.data.user || res.data); // شكل الـ data تخمين
+        this.profile.set(res.data.user || res.data);
       },
     });
 
-    const me = this.auth.user();
-    if (me) {
-      this.usersService.getUserPosts(me._id).subscribe({
-        next: (res) => {
-          this.myPosts.set(res.data.posts || []);
-          this.loadingPosts.set(false);
-        },
-        error: () => {
-          this.loadingPosts.set(false);
-        },
-      });
-    }
-
+    this.loadMyPosts();
     this.loadSaved();
+  }
+
+  
+  loadMyPosts() {
+    const me = this.auth.user();
+    if (!me) {
+      return;
+    }
+    this.loadingPosts.set(true);
+
+    this.usersService.getUserPosts(me._id, this.myPage, this.myLimit).subscribe({
+      next: (res) => {
+        const list: Post[] = res.data.posts || [];
+        this.myPosts.update((old) => old.concat(list));
+
+        const pagination = res.meta && res.meta.pagination;
+        if (pagination) {
+          this.myHasMore.set(pagination.currentPage < pagination.numberOfPages);
+          this.myTotal.set(pagination.total);
+        } else {
+          this.myHasMore.set(list.length === this.myLimit);
+          this.myTotal.set(this.myPosts().length);
+        }
+        this.loadingPosts.set(false);
+      },
+      error: () => {
+        this.loadingPosts.set(false);
+      },
+    });
+  }
+
+  loadMoreMine() {
+    this.myPage = this.myPage + 1;
+    this.loadMyPosts();
   }
 
   ngAfterViewInit() {
@@ -104,9 +141,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       data: {
         labels: this.days(),
         datasets: [
-          { label: this.translations.translate('Likes'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#e11d48', tension: 0.4 },
-          { label: this.translations.translate('Comments'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#38bdf8', tension: 0.4 },
-          { label: this.translations.translate('Shares'), data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#a78bfa', tension: 0.4 },
+          { label: 'Likes', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#e11d48', tension: 0.4 },
+          { label: 'Comments', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#38bdf8', tension: 0.4 },
+          { label: 'Shares', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#a78bfa', tension: 0.4 },
         ],
       },
       options: {
@@ -119,7 +156,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
         },
       },
     });
-   
+    
     this.updateChart();
   }
 
@@ -154,13 +191,14 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     return item._id;
   }
 
- 
+  
   replaceMyPost(updated: Post) {
     this.myPosts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
   }
 
   removePost(postId: string) {
     this.myPosts.update((list) => list.filter((p) => p._id !== postId));
+    this.myTotal.update((n) => Math.max(0, n - 1));
   }
 
  
@@ -184,7 +222,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.round((part / total) * 100);
   }
 
- 
+  
   ringDash(pct: number): string {
     const filled = (pct / 100) * 175.9;
     return filled + ' 175.9';
@@ -196,22 +234,21 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.chart.data.labels = this.days();
-    this.chart.data.datasets[0].label = this.translations.translate('Likes');
-    this.chart.data.datasets[1].label = this.translations.translate('Comments');
-    this.chart.data.datasets[2].label = this.translations.translate('Shares');
-
     const likes = [0, 0, 0, 0, 0, 0, 0];
     const comments = [0, 0, 0, 0, 0, 0, 0];
     const shares = [0, 0, 0, 0, 0, 0, 0];
 
     for (const post of this.myPosts()) {
-      const day = new Date(post.createdAt).getDay(); // 0 = Sunday
+      const day = new Date(post.createdAt).getDay(); 
       likes[day] = likes[day] + (post.likesCount || 0);
       comments[day] = comments[day] + (post.commentsCount || 0);
       shares[day] = shares[day] + (post.sharesCount || 0);
     }
 
+    this.chart.data.labels = this.days();
+    this.chart.data.datasets[0].label = this.translations.translate('Likes');
+    this.chart.data.datasets[1].label = this.translations.translate('Comments');
+    this.chart.data.datasets[2].label = this.translations.translate('Shares');
     this.chart.data.datasets[0].data = likes;
     this.chart.data.datasets[1].data = comments;
     this.chart.data.datasets[2].data = shares;

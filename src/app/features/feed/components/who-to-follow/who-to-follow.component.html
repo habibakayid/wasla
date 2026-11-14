@@ -3,16 +3,23 @@
   <h2 class="font-semibold mb-3">{{ 'Who to follow' | t }}</h2>
 
   <div class="flex gap-4 overflow-x-auto pb-1">
-    <button *ngFor="let user of users()" type="button" (click)="follow(user)"
-            class="flex flex-col items-center shrink-0 w-16">
+    <div *ngFor="let user of users()" class="flex flex-col items-center shrink-0 w-16">
       <span class="relative">
-        <img [src]="user.photo" alt=""
-             class="w-14 h-14 rounded-full object-cover border-2"
-             [ngClass]="user.followed ? 'border-green-500' : 'border-rose'" />
-        <span *ngIf="user.followed"
-              class="absolute -bottom-1 -end-1 w-5 h-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center"><i class="fa-solid fa-check"></i></span>
+        
+        <a [routerLink]="['/profile', user._id]">
+          <img [src]="user.photo" alt=""
+               class="w-14 h-14 rounded-full object-cover border-2 bg-brand"
+               [ngClass]="user.followed ? 'border-green-500' : 'border-rose'" />
+        </a>
+        
+        <button type="button" (click)="follow(user)"
+                class="absolute -bottom-1 -end-1 w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center"
+                [ngClass]="user.followed ? 'bg-green-500' : 'bg-rose'"
+                [attr.aria-label]="(user.followed ? 'Following' : 'Follow') | t">
+          <i class="fa-solid" [ngClass]="user.followed ? 'fa-check' : 'fa-plus'"></i>
+        </button>
       </span>
-      <span class="mt-1 text-xs truncate w-full">{{ firstName(user.name) }}</span>
-    </button>
+      <a [routerLink]="['/profile', user._id]" class="mt-1 text-xs truncate w-full text-center">{{ firstName(user.name) }}</a>
+    </div>
   </div>
 </div>

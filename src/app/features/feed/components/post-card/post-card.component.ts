@@ -7,6 +7,8 @@ import { AuthService } from '@core/services/auth.service';
 import { PostsService } from '@core/services/posts.service';
 import { ToastService } from '@core/services/toast.service';
 import { Post } from '@core/models/post.model';
+import { TranslationService } from '@core/services/translation.service';
+import { PRIVACY_OPTIONS, privacyIcon, privacyOf } from '@core/utils/privacy';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
 import { LocalizedDatePipe } from '@shared/pipes/localized-date.pipe';
 
@@ -35,16 +37,35 @@ export class PostCardComponent {
     return !!me && this.post().likes.includes(me._id);
   });
 
-  
+ 
+  privacyKey = computed(() => privacyOf(this.post().privacy));
+  privacyIconClass = computed(() => privacyIcon(this.post().privacy));
+  privacyLabel = computed(() => PRIVACY_OPTIONS.find((o) => o.key === this.privacyKey())!.label);
+
+ 
+  profileLink = computed(() => {
+    const me = this.auth.user();
+    const owner = this.post().user;
+    return me && me._id === owner._id ? ['/profile'] : ['/profile', owner._id];
+  });
+
+ 
   words = computed(() => (this.post().body || '').split(/(\s+)/));
 
   constructor(
     private postsService: PostsService,
     private auth: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private translations: TranslationService
   ) {}
 
   
+  linkTo(user: any): any[] {
+    const me = this.auth.user();
+    return me && user && me._id === user._id ? ['/profile'] : ['/profile', user && user._id];
+  }
+
+ 
   private setLiked(liked: boolean) {
     const me = this.auth.user();
     if (!me) {
@@ -63,18 +84,19 @@ export class PostCardComponent {
     });
   }
 
- 
+  
   toggleLike() {
     const wasLiked = this.isLiked();
     this.setLiked(!wasLiked);
 
     this.postsService.toggleLike(this.post()._id).subscribe({
       error: () => {
-        this.setLiked(wasLiked); // فشل؟ نرجّع زي ما كان
+        this.setLiked(wasLiked); 
       },
     });
   }
 
+  
   toggleBookmark(showToast: boolean = true) {
     const was = this.post().bookmarked;
     this.post.update((p) => ({ ...p, bookmarked: !was }));
@@ -104,7 +126,7 @@ export class PostCardComponent {
     });
   }
 
-  
+ 
   startEdit() {
     this.editText.set(this.post().body || '');
     this.isEditing.set(true);
@@ -127,7 +149,7 @@ export class PostCardComponent {
 
  
   deletePost() {
-    if (!confirm('Delete this post?')) {
+    if (!confirm(this.translations.translate('Delete this post?'))) {
       return;
     }
 

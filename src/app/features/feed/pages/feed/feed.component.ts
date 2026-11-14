@@ -1,21 +1,25 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 
 import { PostsService } from '@core/services/posts.service';
 import { Post } from '@core/models/post.model';
+import { privacyOf } from '@core/utils/privacy';
+import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { InfiniteScrollDirective } from '@shared/directives/infinite-scroll.directive';
+import { PrivacyFilterComponent } from '@shared/components/privacy-filter/privacy-filter.component';
 import { CreatePostComponent } from '../../components/create-post/create-post.component';
 import { PostCardComponent } from '../../components/post-card/post-card.component';
 import { WhoToFollowComponent } from '../../components/who-to-follow/who-to-follow.component';
-import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-feed',
-  imports: [NgFor, NgIf, NgClass, WhoToFollowComponent, CreatePostComponent, PostCardComponent, TranslatePipe],
+  imports: [NgFor, NgIf, NgClass, WhoToFollowComponent, CreatePostComponent, PostCardComponent, TranslatePipe, InfiniteScrollDirective, PrivacyFilterComponent],
   templateUrl: './feed.component.html',
 })
 export class FeedComponent implements OnInit {
   posts = signal<Post[]>([]);
-  filter = signal('all');
+  filter = signal('all'); 
+  privacy = signal('all'); 
   loading = signal(false);
   hasMore = signal(true);
 
@@ -28,6 +32,15 @@ export class FeedComponent implements OnInit {
     { label: 'Me', value: 'me' },
   ];
 
+ 
+  visiblePosts = computed(() => {
+    const wanted = this.privacy();
+    if (wanted === 'all') {
+      return this.posts();
+    }
+    return this.posts().filter((p) => privacyOf(p.privacy) === wanted);
+  });
+
   constructor(private postsService: PostsService) {}
 
   ngOnInit() {
@@ -39,7 +52,7 @@ export class FeedComponent implements OnInit {
     this.refresh();
   }
 
-  
+
   refresh() {
     this.page = 1;
     this.posts.set([]);
@@ -59,7 +72,7 @@ export class FeedComponent implements OnInit {
         const list: Post[] = res.data.posts || [];
         this.posts.update((old) => old.concat(list));
 
-       
+      
         const pagination = res.meta && res.meta.pagination;
         if (pagination) {
           this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
@@ -80,12 +93,11 @@ export class FeedComponent implements OnInit {
     this.loadPosts();
   }
 
-  
   trackById(index: number, item: { _id: string }) {
     return item._id;
   }
 
- 
+  
   replacePost(updated: Post) {
     this.posts.update((list) => list.map((p) => (p._id === updated._id ? updated : p)));
   }

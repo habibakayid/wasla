@@ -1,25 +1,25 @@
 <div class="min-h-screen bg-cream dark:bg-neutral-900 text-gray-900 dark:text-gray-100">
   <div class="max-w-[1500px] mx-auto flex">
 
-   
+    
     <aside class="hidden lg:flex flex-col shrink-0 sticky top-0 h-screen p-4 border-e border-gray-200 dark:border-neutral-700 transition-[width]"
            [ngClass]="collapsed() ? 'w-24' : 'w-72'">
 
-    
+     
       <div class="h-12 flex items-center">
         <app-brand *ngIf="!collapsed()" />
-        <a *ngIf="collapsed()" routerLink="/" class="mx-auto text-2xl font-extrabold text-brand dark:text-rose" [attr.aria-label]="'Wasla home' | t">W</a>
+        <a *ngIf="collapsed()" routerLink="/" class="mx-auto text-2xl font-extrabold text-brand dark:text-rose" aria-label="Wasla home">W</a>
       </div>
 
-     
+      
       <button type="button" (click)="toggleSidebar()"
               class="mt-2 mb-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-rose"
               [ngClass]="collapsed() ? 'justify-center' : ''">
-        <i class="fa-solid" [class.fa-angles-right]="collapsed()" [class.fa-angles-left]="!collapsed()"></i>
+        <i class="fa-solid rtl:-scale-x-100" [class.fa-angles-right]="collapsed()" [class.fa-angles-left]="!collapsed()"></i>
         <span *ngIf="!collapsed()">{{ 'Collapse Sidebar' | t }}</span>
       </button>
 
-     
+      
       <ng-container *ngIf="auth.user() as user">
         <div *ngIf="!collapsed()"
              class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl p-4 mb-4">
@@ -47,7 +47,7 @@
           </div>
         </div>
         <a *ngIf="collapsed()" routerLink="/profile" class="mx-auto mb-4">
-          <img [src]="user.photo" alt="My profile" class="w-12 h-12 rounded-full object-cover" />
+          <img [src]="user.photo" [alt]="'My profile' | t" class="w-12 h-12 rounded-full object-cover" />
         </a>
       </ng-container>
 
@@ -65,7 +65,7 @@
         </a>
       </nav>
 
-    
+     
       <button type="button" (click)="logout()"
               class="mt-auto flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
               [ngClass]="collapsed() ? 'justify-center px-0' : ''" [attr.title]="'Log out' | t">
@@ -77,28 +77,36 @@
    
     <div class="flex-1 min-w-0">
 
-      
+     
       <header class="sticky top-0 z-30 bg-cream/90 dark:bg-neutral-900/90 backdrop-blur border-b border-gray-200 dark:border-neutral-700">
         <div class="flex items-center gap-3 px-4 h-16">
 
          
           <div class="lg:hidden"><app-brand /></div>
 
-          
+         
           <div class="relative flex-1 max-w-3xl hidden sm:block">
             <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
               <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
             </div>
             <input type="search"
+                   [value]="searchText()"
+                   (input)="onSearchInput($any($event.target).value)"
+                   (keyup.enter)="submitSearch()"
                    class="block w-full p-3 ps-11 bg-white dark:bg-neutral-800 border-2 border-gold/60 text-sm rounded-full focus:ring-gold focus:border-gold"
-                   [placeholder]="'Search wasla...' | t" />
+                   [placeholder]="'Search people and posts...' | t" />
           </div>
           <div class="flex-1 sm:hidden"></div>
+
+         
+          <a routerLink="/search" class="sm:hidden p-2 rounded-full bg-gray-100 dark:bg-neutral-700" [attr.aria-label]="'Search' | t">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </a>
 
           <app-language-switcher />
 
           <button type="button" (click)="toggleTheme()"
-                  class="p-2 rounded-full bg-gray-100 dark:bg-neutral-700" [attr.aria-label]="'Toggle dark mode' | t">
+                  class="p-2 rounded-full bg-gray-100 dark:bg-neutral-700" [attr.aria-label]="'Dark mode' | t">
             <i *ngIf="theme.isDark()" class="fa-solid fa-sun"></i>
             <i *ngIf="!theme.isDark()" class="fa-solid fa-moon"></i>
           </button>
@@ -117,7 +125,7 @@
         </div>
       </header>
 
-      
+     
       <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_20rem] gap-6 px-4 py-6 pb-24 lg:pb-6">
         <main class="min-w-0 max-w-3xl w-full mx-auto xl:mx-0">
           <router-outlet />
@@ -131,7 +139,9 @@
               <ul class="space-y-3">
                 <li *ngFor="let n of recent()" class="flex items-start gap-3">
                  
-                  <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-8 h-8 rounded-full object-cover" />
+                  <a *ngIf="n.sender?.photo" [routerLink]="senderLink(n.sender)" class="shrink-0">
+                    <img [src]="n.sender.photo" alt="" class="w-8 h-8 rounded-full object-cover bg-brand" />
+                  </a>
                   <div class="text-sm min-w-0">
                     <p class="truncate">{{ n.message || n.type }}</p>
                     <p class="text-xs text-gray-500">{{ n.createdAt | localizedDate: 'short' }}</p>
@@ -146,7 +156,7 @@
     </div>
   </div>
 
-  
+ 
   <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700">
     <div class="grid grid-cols-5 h-16 text-center text-xs">
       <a routerLink="/" class="flex flex-col items-center justify-center"><i class="fa-solid fa-house text-lg"></i><span>{{ 'Home' | t }}</span></a>

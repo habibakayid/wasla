@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 
 import { API_URL } from '../config';
 
-
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   constructor(private http: HttpClient) {}
@@ -24,24 +23,30 @@ export class UsersService {
     return this.http.get<any>(API_URL + '/users/suggestions?page=1&limit=' + limit);
   }
 
-  
   toggleFollow(userId: string) {
     return this.http.put<any>(API_URL + '/users/' + userId + '/follow', {});
   }
 
-  getUserPosts(userId: string) {
-    return this.http.get<any>(API_URL + '/users/' + userId + '/posts?page=1&limit=50');
+  getUserPosts(userId: string, page: number = 1, limit: number = 10) {
+    return this.http.get<any>(
+      API_URL + '/users/' + userId + '/posts?page=' + page + '&limit=' + limit,
+    );
+  }
+
+  getUserProfile(userId: string) {
+    return this.http.get<any>(API_URL + '/users/' + userId + '/profile');
   }
 
   getBookmarks() {
     return this.http.get<any>(API_URL + '/users/bookmarks');
   }
 
-  
   changePassword(password: string, newPassword: string) {
-    return this.http.patch<any>(API_URL + '/users/change-password', { password: password, newPassword: newPassword });
+    return this.http.patch<any>(API_URL + '/users/change-password', {
+      password: password,
+      newPassword: newPassword,
+    });
   }
-
 
   uploadPhoto(file: File) {
     const formData = new FormData();

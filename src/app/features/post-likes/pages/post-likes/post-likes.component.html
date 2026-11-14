@@ -1,0 +1,27 @@
+<a [routerLink]="['/posts', postId]" class="inline-block mb-3 text-sm text-brand dark:text-rose hover:underline">
+  <i class="fa-solid fa-arrow-left rtl:-scale-x-100"></i> {{ 'Back to post' | t }}
+</a>
+
+<div class="flex items-center gap-3 mb-4">
+  <span class="w-10 h-10 rounded-full bg-rose/10 text-rose flex items-center justify-center"><i class="fa-solid fa-heart"></i></span>
+  <div>
+    <h1 class="text-lg font-extrabold leading-tight">{{ 'People who liked this post' | t }}</h1>
+    <p *ngIf="total() > 0" class="text-xs text-gray-500">{{ '{n} likes' | t: { n: total() } }}</p>
+  </div>
+</div>
+
+<p *ngIf="loading() && users().length === 0" class="text-sm text-gray-500">{{ 'Loading...' | t }}</p>
+
+<p *ngIf="!loading() && users().length === 0" class="text-center text-sm text-gray-500 py-10">
+  <i class="fa-regular fa-heart text-3xl block mb-2 text-gray-400"></i>
+  {{ 'No likes yet.' | t }}
+</p>
+
+<div class="space-y-2">
+  <app-user-row *ngFor="let u of users(); trackBy: trackById" [user]="u" />
+</div>
+
+<div [appInfiniteScroll]="hasMore() && !loading()" (reached)="loadMore()" class="h-4"></div>
+<p *ngIf="loading() && users().length > 0" class="text-center text-sm text-gray-500 py-3">
+  <i class="fa-solid fa-spinner fa-spin"></i> {{ 'Loading...' | t }}
+</p>

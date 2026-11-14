@@ -148,6 +148,54 @@ const arabicTranslations: Record<string, string> = {
   'Undo': 'تراجع',
   'Your session has expired. Please sign in again.': 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.',
   'Something went wrong. Please try again.': 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+    
+  'Search': 'بحث',
+  'Search people and posts...': 'ابحث عن أشخاص ومنشورات...',
+  'Sign up': 'إنشاء حساب',
+  'Not found': 'غير موجود',
+  'No posts match this filter': 'لا توجد منشورات بهذا الفلتر',
+  'Try another privacy filter.': 'جرّب فلتر خصوصية آخر.',
+  'Privacy': 'الخصوصية',
+  'Only me': 'أنا فقط',
+  'What\'s on your mind?': 'بماذا تفكر؟',
+  'Delete this post?': 'هل تريد حذف هذا المنشور؟',
+  'Post bookmarked!': 'تم حفظ المنشور!',
+  'Bookmark removed': 'تمت إزالة الحفظ',
+  'See who liked this': 'من أعجبه هذا المنشور',
+  'This post is not available.': 'هذا المنشور غير متاح.',
+  'Delete this comment?': 'هل تريد حذف هذا التعليق؟',
+  'People who liked this post': 'من أعجبهم هذا المنشور',
+  'Back to post': 'الرجوع للمنشور',
+  'No likes yet.': 'لا توجد إعجابات بعد.',
+  '{n} likes': '{n} إعجاب',
+  'Type a name, username or a word from a post.': 'اكتب اسماً أو اسم مستخدم أو كلمة من منشور.',
+  'Searching suggested people and the latest 100 posts.': 'البحث في الأشخاص المقترحين وآخر 100 منشور.',
+  'Results for "{q}"': 'نتائج "{q}"',
+  'People': 'أشخاص',
+  'Nothing found for "{q}".': 'لم يتم العثور على نتائج لـ "{q}".',
+  'Searching...': 'جاري البحث...',
+  'No posts to show.': 'لا توجد منشورات للعرض.',
+  'This account could not be found.': 'تعذّر العثور على هذا الحساب.',
+  'You': 'أنت',
+  '{n}% of interaction': '{n}% من التفاعل',
+  '{n} Saved posts': '{n} منشور محفوظ',
+  'Sun': 'الأحد',
+  'Mon': 'الإثنين',
+  'Tue': 'الثلاثاء',
+  'Wed': 'الأربعاء',
+  'Thu': 'الخميس',
+  'Fri': 'الجمعة',
+  'Sat': 'السبت',
+  'liked your post': 'أعجب بمنشورك',
+  'commented on your post': 'علّق على منشورك',
+  'replied to your comment': 'رد على تعليقك',
+  'shared your post': 'شارك منشورك',
+  'started following you': 'بدأ بمتابعتك',
+  'Step {n} of 2': 'الخطوة {n} من 2',
+  'Use at least 8 characters.': 'استخدم 8 أحرف على الأقل.',
+  'Page not found': 'الصفحة غير موجودة',
+  'The page you\'re looking for doesn\'t exist.': 'الصفحة التي تبحث عنها غير موجودة.',
+  'Back to home': 'العودة للرئيسية',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -163,8 +211,14 @@ export class TranslationService {
     return this.language() === 'ar' ? 'ar-EG' : 'en-US';
   }
 
-  translate(text: string): string {
-    return this.language() === 'ar' ? (arabicTranslations[text] ?? text) : text;
+  translate(text: string, params?: Record<string, string | number>): string {
+    let result = this.language() === 'ar' ? (arabicTranslations[text] ?? text) : text;
+    if (params) {
+      for (const key of Object.keys(params)) {
+        result = result.split('{' + key + '}').join(String(params[key]));
+      }
+    }
+    return result;
   }
 
   toggleLanguage(): void {

@@ -1,0 +1,62 @@
+<h1 class="text-xl font-extrabold mb-3">{{ 'Search' | t }}</h1>
+
+
+<div class="relative mb-4 sm:hidden">
+  <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
+    <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+  </div>
+  <input type="search" #box [value]="term()" (input)="onType(box.value)"
+         class="block w-full p-3 ps-11 bg-white dark:bg-neutral-800 border-2 border-gold/60 text-sm rounded-full focus:ring-gold focus:border-gold"
+         [placeholder]="'Search people and posts...' | t" />
+</div>
+
+<p *ngIf="term() === ''" class="text-center text-sm text-gray-500 py-10">
+  <i class="fa-solid fa-magnifying-glass text-3xl block mb-2 text-gray-400"></i>
+  {{ 'Type a name, username or a word from a post.' | t }}
+</p>
+
+<ng-container *ngIf="term() !== ''">
+  <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">{{ 'Results for "{q}"' | t: { q: term() } }}</p>
+  <p class="text-xs text-gray-400 mb-3">{{ 'Searching suggested people and the latest 100 posts.' | t }}</p>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-4">
+    <button type="button" (click)="tab.set('all')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
+            [ngClass]="tab() === 'all' ? 'bg-brand text-white border-transparent' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600'">
+      {{ 'All' | t }}
+    </button>
+    <button type="button" (click)="tab.set('people')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
+            [ngClass]="tab() === 'people' ? 'bg-brand text-white border-transparent' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600'">
+      {{ 'People' | t }} ({{ people().length }})
+    </button>
+    <button type="button" (click)="tab.set('posts')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
+            [ngClass]="tab() === 'posts' ? 'bg-brand text-white border-transparent' : 'bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600'">
+      {{ 'Posts' | t }} ({{ posts().length }})
+    </button>
+  </div>
+
+  <p *ngIf="loading()" class="text-sm text-gray-500 py-6 text-center">
+    <i class="fa-solid fa-spinner fa-spin"></i> {{ 'Searching...' | t }}
+  </p>
+
+  <p *ngIf="!loading() && people().length === 0 && posts().length === 0" class="text-center text-sm text-gray-500 py-10">
+    {{ 'Nothing found for "{q}".' | t: { q: term() } }}
+  </p>
+
+  <!-- People -->
+  <section *ngIf="!loading() && tab() !== 'posts' && people().length > 0" class="mb-6">
+    <h2 class="font-semibold mb-2">{{ 'People' | t }}</h2>
+    <div class="space-y-2">
+      <app-user-row *ngFor="let u of shownPeople(); trackBy: trackById" [user]="u" />
+    </div>
+  </section>
+
+  <!-- Posts -->
+  <section *ngIf="!loading() && tab() !== 'people' && posts().length > 0">
+    <h2 class="font-semibold mb-2">{{ 'Posts' | t }}</h2>
+    <div class="space-y-4">
+      <app-post-card *ngFor="let post of visiblePosts(); trackBy: trackById" [post]="post" (postChange)="replacePost($event)" (deleted)="removePost($event)" />
+    </div>
+    <div [appInfiniteScroll]="hasMorePosts()" (reached)="showMorePosts()" class="h-4"></div>
+  </section>
+</ng-container>

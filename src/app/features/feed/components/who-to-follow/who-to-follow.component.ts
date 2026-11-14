@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { UsersService } from '@core/services/users.service';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-who-to-follow',
-  imports: [NgFor, NgIf, NgClass, TranslatePipe],
+  imports: [NgFor, NgIf, NgClass, RouterLink, TranslatePipe],
   templateUrl: './who-to-follow.component.html',
 })
 export class WhoToFollowComponent implements OnInit {

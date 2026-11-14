@@ -12,7 +12,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { API_URL } from '../config';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
-
+import { SKIP_ERROR_TOAST } from '../utils/body-fallback';
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
   constructor(
@@ -39,7 +39,12 @@ export class ApiInterceptor implements HttpInterceptor {
           this.auth.clearSession();
           this.toast.error('Your session has expired. Please sign in again.');
           this.router.navigate(['/auth/signin']);
-        } else {
+        }else if (req.context.get(SKIP_ERROR_TOAST) && [400, 415, 422].includes(error.status))
+        {
+          //in services
+        }
+        
+        else {
           let message = 'Something went wrong. Please try again.';
           if (error.error && error.error.message) {
             message = error.error.message;

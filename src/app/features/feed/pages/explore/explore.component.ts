@@ -3,13 +3,14 @@ import { NgFor, NgIf } from '@angular/common';
 
 import { PostsService } from '@core/services/posts.service';
 import { Post } from '@core/models/post.model';
-import { PostCardComponent } from '../../components/post-card/post-card.component';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { InfiniteScrollDirective } from '@shared/directives/infinite-scroll.directive';
+import { PostCardComponent } from '../../components/post-card/post-card.component';
 
 
 @Component({
   selector: 'app-explore',
-  imports: [NgFor, NgIf, PostCardComponent, TranslatePipe],
+  imports: [NgFor, NgIf, PostCardComponent, TranslatePipe, InfiniteScrollDirective],
   templateUrl: './explore.component.html',
 })
 export class ExploreComponent implements OnInit {
@@ -57,6 +58,7 @@ export class ExploreComponent implements OnInit {
     this.loadPosts();
   }
 
+  
   trackById(index: number, item: { _id: string }) {
     return item._id;
   }

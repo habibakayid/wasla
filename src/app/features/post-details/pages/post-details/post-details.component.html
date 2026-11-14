@@ -1,11 +1,12 @@
-<a routerLink="/" class="inline-block mb-3 text-sm text-brand dark:text-rose hover:underline"><i class="fa-solid fa-arrow-left"></i> {{ 'Back to feed' | t }}</a>
+<a routerLink="/" class="inline-block mb-3 text-sm text-brand dark:text-rose hover:underline"><i class="fa-solid fa-arrow-left rtl:-scale-x-100"></i> {{ 'Back to feed' | t }}</a>
 
 <p *ngIf="loadingPost()" class="text-sm text-gray-500">{{ 'Loading...' | t }}</p>
+<p *ngIf="!loadingPost() && !post()" class="text-center text-sm text-gray-500 py-10">{{ 'This post is not available.' | t }}</p>
 
 <div *ngIf="post() as currentPost">
   <app-post-card [post]="currentPost" (postChange)="post.set($event)" (deleted)="onPostDeleted()" />
 
-  
+
   <form (ngSubmit)="sendComment()" class="mt-4">
     <div class="w-full border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-800 shadow-sm">
       <div class="px-4 py-2">
@@ -29,7 +30,7 @@
     </div>
   </form>
 
- 
+  
   <h2 class="font-semibold mt-6 mb-3">{{ 'Comments' | t }} ({{ currentPost.commentsCount }})</h2>
 
   <p *ngIf="!loadingComments() && comments().length === 0" class="text-sm text-gray-500 text-center py-6">
@@ -42,10 +43,9 @@
                       (commentChange)="replaceComment($event)" (deleted)="removeComment($event)" />
   </div>
 
-  <div *ngIf="hasMore() && comments().length > 0" class="text-center mt-4">
-    <button type="button" (click)="loadMore()" [disabled]="loadingComments()"
-            class="px-5 py-2 rounded-lg text-sm font-medium border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-50">
-      {{ (loadingComments() ? 'Loading...' : 'Load more comments') | t }}
-    </button>
-  </div>
+  
+  <div [appInfiniteScroll]="hasMore() && !loadingComments()" (reached)="loadMore()" class="h-4"></div>
+  <p *ngIf="loadingComments() && comments().length > 0" class="text-center text-sm text-gray-500 py-3">
+    <i class="fa-solid fa-spinner fa-spin"></i> {{ 'Loading...' | t }}
+  </p>
 </div>

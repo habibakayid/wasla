@@ -11,10 +11,11 @@ import { Comment } from '@core/models/comment.model';
 import { PostCardComponent } from '@features/feed/components/post-card/post-card.component';
 import { CommentItemComponent } from '../../components/comment-item/comment-item.component';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
+import { InfiniteScrollDirective } from '@shared/directives/infinite-scroll.directive';
 
 @Component({
   selector: 'app-post-details',
-  imports: [NgIf, NgFor, FormsModule, RouterLink, PostCardComponent, CommentItemComponent, TranslatePipe],
+  imports: [NgIf, NgFor, FormsModule, RouterLink, PostCardComponent, CommentItemComponent, TranslatePipe, InfiniteScrollDirective],
   templateUrl: './post-details.component.html',
 })
 export class PostDetailsComponent implements OnInit {
@@ -46,7 +47,6 @@ export class PostDetailsComponent implements OnInit {
 
     this.postsService.getPost(this.postId).subscribe({
       next: (res) => {
-       
         this.post.set(res.data.post || res.data);
         this.loadingPost.set(false);
       },
@@ -114,7 +114,7 @@ export class PostDetailsComponent implements OnInit {
         this.sending.set(false);
         this.toast.success('Comment added');
 
-       
+        
         this.comments.set([]);
         this.page = 1;
         this.hasMore.set(true);
@@ -128,11 +128,12 @@ export class PostDetailsComponent implements OnInit {
     });
   }
 
+
   trackById(index: number, item: { _id: string }) {
     return item._id;
   }
 
-  
+
   replaceComment(updated: Comment) {
     this.comments.update((list) => list.map((c) => (c._id === updated._id ? updated : c)));
   }
@@ -141,7 +142,6 @@ export class PostDetailsComponent implements OnInit {
     this.comments.update((list) => list.filter((c) => c._id !== commentId));
     this.post.update((p) => (p ? { ...p, commentsCount: Math.max(0, p.commentsCount - 1) } : p));
   }
-
 
   onPostDeleted() {
     this.router.navigate(['/']);

@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { UsersService } from '@core/services/users.service';
 import { TranslatePipe } from '@shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-suggestions',
-  imports: [NgFor, NgIf, NgClass, TranslatePipe],
+  imports: [NgFor, NgIf, NgClass, RouterLink, TranslatePipe],
   templateUrl: './suggestions.component.html',
 })
 export class SuggestionsComponent implements OnInit {
@@ -18,7 +19,7 @@ export class SuggestionsComponent implements OnInit {
   ngOnInit() {
     this.usersService.getSuggestions(5).subscribe({
       next: (res) => {
-       
+        
         if (Array.isArray(res.data)) {
           this.users.set(res.data);
         } else {
@@ -38,7 +39,6 @@ export class SuggestionsComponent implements OnInit {
   }
 
   follow(user: any) {
-    
     const was = !!user.followed;
     this.setFollowed(user._id, !was);
 

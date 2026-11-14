@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import {formThenJson} from '../utils/body-fallback';
 import { API_URL } from '../config';
 
 @Injectable({ providedIn: 'root' })
@@ -32,10 +32,17 @@ export class PostsService {
     return this.http.post<any>(API_URL + '/posts', formData);
   }
 
+   getLikes(postId: string, page: number, limit: number) {
+    return this.http.get<any>(API_URL + '/posts/' + postId + '/likes?page=' + page + '&limit=' + limit);
+  }
+
   updatePost(postId: string, body: string) {
     const formData = new FormData();
     formData.append('body', body);
-    return this.http.put<any>(API_URL + '/posts/' + postId, formData);
+    return formThenJson(
+      (context) => this.http.put<any>(API_URL + '/posts/' + postId, formData, { context }),
+      () => this.http.put<any>(API_URL + '/posts/' + postId, { body: body }),
+    );
   }
 
   deletePost(postId: string) {

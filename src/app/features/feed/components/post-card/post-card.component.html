@@ -1,19 +1,22 @@
 <article class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-sm">
 
-  
+ 
   <div class="flex items-center gap-3 p-4">
-    <img [src]="post().user.photo" alt="" class="w-10 h-10 rounded-full object-cover" />
+    <a [routerLink]="profileLink()" class="shrink-0">
+      <img [src]="post().user.photo" alt="" class="w-10 h-10 rounded-full object-cover bg-brand" />
+    </a>
     <div class="flex-1 min-w-0">
       <p class="font-semibold truncate">
-        {{ post().user.name }}
+        <a [routerLink]="profileLink()" class="hover:underline">{{ post().user.name }}</a>
         <span *ngIf="post().isShare" class="text-xs font-normal text-gray-500">{{ 'shared a post' | t }}</span>
       </p>
       <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-        &#64;{{ post().user.username }} · {{ post().createdAt | localizedDate: 'medium' }}
+        &#64;{{ post().user.username }} · {{ post().createdAt | localizedDate: 'medium' }} ·
+        <i class="fa-solid" [ngClass]="privacyIconClass()" [attr.title]="privacyLabel() | t"></i>
       </p>
     </div>
 
-   
+    
     <div *ngIf="isMine() && !isEditing()" class="relative">
       <button type="button" (click)="menuOpen.set(!menuOpen())"
               class="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-700" [attr.aria-label]="'More' | t"><i class="fa-solid fa-ellipsis"></i></button>
@@ -28,12 +31,13 @@
   </div>
 
   
-  <p *ngIf="!isEditing() && post().body" class="px-4 pb-3 text-sm whitespace-pre-line"><span
+  <p *ngIf="!isEditing() && post().body" class="px-4 pb-3 text-sm whitespace-pre-line"><a
+      [routerLink]="['/posts', post()._id]" class="block"><span
       *ngFor="let w of words()"
       [class.text-rose]="w.startsWith('#') || w.startsWith('@')"
-      [class.font-medium]="w.startsWith('#') || w.startsWith('@')">{{ w }}</span></p>
+      [class.font-medium]="w.startsWith('#') || w.startsWith('@')">{{ w }}</span></a></p>
 
- 
+  
   <div *ngIf="isEditing()" class="px-4 pb-3">
     <textarea [(ngModel)]="editText" rows="3"
               class="block w-full text-sm bg-gray-50 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-brand focus:border-brand"></textarea>
@@ -43,31 +47,40 @@
     </div>
   </div>
 
-  
+ 
   <div *ngIf="post().isShare && post().sharedPost as shared"
        class="mx-4 mb-3 border border-gray-200 dark:border-neutral-600 rounded-lg p-3">
     <div class="flex items-center gap-2 mb-2">
-      <img [src]="shared.user.photo" alt="" class="w-7 h-7 rounded-full object-cover" />
-      <p class="text-sm font-semibold">{{ shared.user.name }}</p>
-      <p class="text-xs text-gray-500">&#64;{{ shared.user.username }}</p>
+      <a [routerLink]="linkTo(shared.user)" class="flex items-center gap-2 min-w-0">
+        <img [src]="shared.user.photo" alt="" class="w-7 h-7 rounded-full object-cover bg-brand" />
+        <span class="text-sm font-semibold hover:underline">{{ shared.user.name }}</span>
+        <span class="text-xs text-gray-500">&#64;{{ shared.user.username }}</span>
+      </a>
     </div>
-    <p class="text-sm whitespace-pre-line">{{ shared.body }}</p>
-    <img *ngIf="shared.image" [src]="shared.image" alt="" class="mt-2 w-full max-h-72 object-cover rounded-lg" />
+    <a [routerLink]="['/posts', shared._id]" class="block">
+      <p class="text-sm whitespace-pre-line">{{ shared.body }}</p>
+      <img *ngIf="shared.image" [src]="shared.image" alt="" class="mt-2 w-full max-h-72 object-cover rounded-lg" />
+    </a>
   </div>
 
-  
-  <img *ngIf="post().image" [src]="post().image" alt="" class="w-full max-h-[28rem] object-cover" />
+ 
+  <a *ngIf="post().image" [routerLink]="['/posts', post()._id]" class="block">
+    <img [src]="post().image" alt="" class="w-full max-h-[28rem] object-cover" />
+  </a>
 
-  
+ 
   <div class="flex items-center gap-1 px-2 py-2 border-t border-gray-200 dark:border-neutral-700 text-sm">
 
-    
-    <button type="button" (click)="toggleLike()"
-            class="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
-            [ngClass]="isLiked() ? 'text-rose' : 'text-gray-600 dark:text-gray-300'">
-      <i class="fa-heart" [ngClass]="isLiked() ? 'fa-solid' : 'fa-regular'"></i>
-      {{ post().likesCount }} {{ 'Likes' | t }}
-    </button>
+   
+    <div class="flex items-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
+         [ngClass]="isLiked() ? 'text-rose' : 'text-gray-600 dark:text-gray-300'">
+      <button type="button" (click)="toggleLike()" class="ps-3 pe-1.5 py-2" [attr.aria-label]="'Like' | t">
+        <i class="fa-heart" [ngClass]="isLiked() ? 'fa-solid' : 'fa-regular'"></i>
+      </button>
+      <a [routerLink]="['/posts', post()._id, 'likes']" class="pe-3 py-2 hover:underline" [attr.title]="'See who liked this' | t">
+        {{ post().likesCount }} {{ 'Likes' | t }}
+      </a>
+    </div>
 
    
     <a [routerLink]="['/posts', post()._id]"
@@ -75,13 +88,13 @@
       <i class="fa-regular fa-comment"></i> {{ post().commentsCount }} {{ 'Comments' | t }}
     </a>
 
-    
+   
     <button type="button" (click)="share()"
             class="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-gray-600 dark:text-gray-300">
       <i class="fa-solid fa-retweet"></i> {{ post().sharesCount }} {{ 'Share' | t }}
     </button>
 
-   
+    
     <button type="button" (click)="toggleBookmark()"
             class="ms-auto flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
             [ngClass]="post().bookmarked ? 'text-gold' : 'text-gray-600 dark:text-gray-300'" [attr.aria-label]="'Bookmark' | t">
@@ -92,7 +105,9 @@
 
   
   <div *ngIf="post().topComment as top" class="flex gap-2 px-4 py-3 border-t border-gray-100 dark:border-neutral-700">
-    <img [src]="top.commentCreator.photo" alt="" class="w-7 h-7 rounded-full object-cover" />
+    <a [routerLink]="linkTo(top.commentCreator)" class="shrink-0">
+      <img [src]="top.commentCreator.photo" alt="" class="w-7 h-7 rounded-full object-cover bg-brand" />
+    </a>
     <div class="bg-gray-100 dark:bg-neutral-700 rounded-2xl px-3 py-1.5 text-sm min-w-0">
       <p class="text-xs font-semibold">{{ top.commentCreator.name }}</p>
       <p class="truncate">{{ top.content }}</p>
