@@ -15,13 +15,17 @@ export class NotificationsService {
   ) {}
 
 
+  // getNotifications(unread: string, page: number, limit: number) {
+  //   let url = API_URL + '/notifications?page=' + page + '&limit=' + limit;
+  //   if (unread === 'true') {
+  //     url = url + '&unread=true';
+  //   }
+  //   return this.http.get<any>(url);
+  // }
   getNotifications(unread: string, page: number, limit: number) {
-    let url = API_URL + '/notifications?page=' + page + '&limit=' + limit;
-    if (unread === 'true') {
-      url = url + '&unread=true';
-    }
-    return this.http.get<any>(url);
-  }
+  
+  return this.http.get<any>(API_URL + '/notifications?page=' + page + '&limit=' + limit);
+}
 
   getUnreadCount() {
     return this.http.get<any>(API_URL + '/notifications/unread-count');

@@ -86,40 +86,45 @@ export class NotificationsComponent implements OnInit {
     this.load();
   }
 
-  load() {
-    if (this.loading()) {
-      return;
-    }
-    this.loading.set(true);
-
-    const unread = this.tab() === 'unread' ? 'true' : 'false';
-
-    this.notificationsService.getNotifications(unread, this.page, this.limit).subscribe({
-      next: (res) => {
-        let list: any[] = res.data.notifications || [];
-       
-        if (this.tab() === 'unread') {
-          list = list.filter((n) => !n.isRead);
-        }
-
-
-        this.notifications.update((old) => old.concat(list));
-
-        const pagination = res.meta && res.meta.pagination;
-        if (pagination) {
-          this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
-        } else {
-          this.hasMore.set(list.length === this.limit);
-        }
-
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.hasMore.set(false);
-      },
-    });
+ load() {
+  if (this.loading()) {
+    return;
   }
+  this.loading.set(true);
+
+  this.notificationsService.getNotifications('', this.page, this.limit).subscribe({
+    next: (res) => {
+      let list: any[] = res.data.notifications || [];
+
+      
+      if (this.tab() === 'unread') {
+        list = list.filter((n) => !n.isRead);
+      }
+
+      this.notifications.update((old) => old.concat(list));
+
+      const pagination = res.meta && res.meta.pagination;
+      if (pagination) {
+        this.hasMore.set(pagination.currentPage < pagination.numberOfPages);
+      } else {
+        this.hasMore.set((res.data.notifications || []).length === this.limit);
+      }
+
+      this.loading.set(false);
+
+      
+      if (this.tab() === 'unread' && list.length === 0 && this.hasMore()) {
+        this.page = this.page + 1;
+        this.load();
+      }
+    },
+    error: () => {
+      this.loading.set(false);
+    },
+  });
+}
+
+
 
   loadMore() {
     this.page = this.page + 1;
