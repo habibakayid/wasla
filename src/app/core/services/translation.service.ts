@@ -201,6 +201,16 @@ const arabicTranslations: Record<string, string> = {
   'No unread notifications': 'لا توجد إشعارات غير مقروءة',
   'No notifications yet': 'لا توجد إشعارات بعد',
   'When someone likes, comments or follows you, it will show up here.': 'عندما يعجب بك أحد أو يعلّق أو يتابعك سيظهر هنا.',
+  'Connect with people around you.': 'تواصل مع الناس من حولك.',
+  'Wasla is a social network where you share moments, follow people you like and join the conversation.': 'وصلة شبكة اجتماعية تشارك فيها لحظاتك، وتتابع من تحب، وتنضم إلى الحوار.',
+  'Share moments': 'شارك لحظاتك',
+  'Post text and photos with your people.': 'انشر نصوصاً وصوراً مع من تحب.',
+  'Follow people': 'تابع الأشخاص',
+  'Build your feed from people you like.': 'كوّن صفحتك الرئيسية ممن تحب.',
+  'Like & comment': 'أعجب وعلّق',
+  'React, reply and keep the talk going.': 'تفاعل وردّ وأكمل الحوار.',
+  'Save posts': 'احفظ المنشورات',
+  'Keep what you love for later.': 'احتفظ بما تحبه لوقت لاحق.',
 };
 
 @Injectable({ providedIn: 'root' })
