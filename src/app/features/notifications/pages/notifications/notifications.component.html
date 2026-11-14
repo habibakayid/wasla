@@ -1,42 +1,92 @@
-<div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl">
+<div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-2xl shadow-sm overflow-hidden">
 
-  <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-neutral-700">
-    <h1 class="font-extrabold text-lg">{{ 'Notifications' | t }}</h1>
-    <button type="button" (click)="markAllRead()" class="text-sm text-brand dark:text-rose hover:underline">
-      <i class="fa-solid fa-check-double"></i> {{ 'Mark all as read' | t }}
+ 
+  <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-gray-200 dark:border-neutral-700">
+    <div class="flex items-center gap-3">
+      <span class="w-10 h-10 rounded-full bg-brand/10 text-brand dark:text-rose flex items-center justify-center">
+        <i class="fa-solid fa-bell"></i>
+      </span>
+      <div>
+        <h1 class="font-extrabold text-lg leading-tight">{{ 'Notifications' | t }}</h1>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ notificationsService.unreadCount() > 0 ? ('{n} unread' | t: { n: notificationsService.unreadCount() }) : ('You\'re all caught up' | t) }}
+        </p>
+      </div>
+    </div>
+
+    <button type="button" (click)="markAllRead()"
+                       [disabled]="markingAll()"
+            class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border border-brand/40 text-brand dark:text-rose dark:border-rose/40 hover:bg-brand/5 disabled:opacity-40 disabled:cursor-not-allowed">
+      <i class="fa-solid" [ngClass]="markingAll() ? 'fa-spinner fa-spin' : 'fa-check-double'"></i>
+      {{ 'Mark all as read' | t }}
     </button>
   </div>
 
-  <div class="flex gap-2 p-3">
+ 
+  <div class="flex gap-2 px-5 py-3 border-b border-gray-100 dark:border-neutral-700">
     <button type="button" (click)="changeTab('all')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
-            [ngClass]="tab() === 'all' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
+            [ngClass]="tab() === 'all' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-200'">
       {{ 'All' | t }}
     </button>
-    <button type="button" (click)="changeTab('unread')" class="px-4 py-1.5 rounded-full text-sm font-medium border"
-            [ngClass]="tab() === 'unread' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600'">
+    <button type="button" (click)="changeTab('unread')" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium border"
+            [ngClass]="tab() === 'unread' ? 'bg-brand text-white border-transparent' : 'border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-200'">
       {{ 'Unread' | t }}
+      <span *ngIf="notificationsService.unreadCount() > 0"
+            class="min-w-5 h-5 px-1.5 rounded-full bg-rose text-white text-xs font-bold inline-flex items-center justify-center">
+        {{ notificationsService.unreadCount() }}
+      </span>
     </button>
   </div>
 
-  <p *ngIf="loading() && notifications().length === 0" class="p-4 text-sm text-gray-500">{{ 'Loading...' | t }}</p>
-
-  <div *ngIf="!loading() && notifications().length === 0" class="text-center py-12">
-    <p class="text-3xl mb-2 text-gray-400"><i class="fa-regular fa-bell"></i></p>
-    <p class="font-semibold">{{ 'You\'re all caught up' | t }}</p>
+  
+  <div *ngIf="loading() && notifications().length === 0" class="divide-y divide-gray-100 dark:divide-neutral-700">
+    <div *ngFor="let i of [1, 2, 3, 4]" class="animate-pulse flex items-center gap-3 px-5 py-4">
+      <div class="w-11 h-11 rounded-full bg-gray-200 dark:bg-neutral-700"></div>
+      <div class="flex-1 space-y-2">
+        <div class="h-3 w-2/3 rounded bg-gray-200 dark:bg-neutral-700"></div>
+        <div class="h-3 w-1/4 rounded bg-gray-200 dark:bg-neutral-700"></div>
+      </div>
+    </div>
   </div>
 
-  <ul>
+  
+  <div *ngIf="!loading() && notifications().length === 0" class="text-center py-16 px-6">
+    <span class="mx-auto mb-3 w-16 h-16 rounded-full bg-gray-100 dark:bg-neutral-700 text-gray-400 flex items-center justify-center text-2xl">
+      <i class="fa-regular fa-bell"></i>
+    </span>
+    <p class="font-semibold">{{ (tab() === 'unread' ? 'No unread notifications' : 'No notifications yet') | t }}</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'When someone likes, comments or follows you, it will show up here.' | t }}</p>
+  </div>
+
+  
+  <ul class="divide-y divide-gray-100 dark:divide-neutral-700">
     <li *ngFor="let n of notifications(); trackBy: trackById">
       <button type="button" (click)="open(n)"
-              class="w-full flex items-start gap-3 text-start px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 border-t border-gray-100 dark:border-neutral-700"
-              [ngClass]="n.isRead ? '' : 'bg-rose/5'">
-        <!-- sender / message / createdAt تخمين لحد ما نشوف إشعار حقيقي -->
-        <img *ngIf="n.sender?.photo" [src]="n.sender.photo" alt="" class="w-10 h-10 rounded-full object-cover bg-brand" />
+              class="w-full flex items-start gap-3 text-start px-5 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/60 transition-colors"
+              [ngClass]="n.isRead ? '' : 'bg-rose/5 dark:bg-rose/10'">
+
+       
+        <span class="relative shrink-0">
+          <img *ngIf="n.actor?.photo" [src]="n.actor.photo" alt="" class="w-11 h-11 rounded-full object-cover bg-brand" />
+          <span *ngIf="!n.actor?.photo"
+                class="w-11 h-11 rounded-full bg-brand text-white flex items-center justify-center font-bold">
+            {{ initial(n) }}
+          </span>
+          <span class="absolute -bottom-1 -end-1 w-5 h-5 rounded-full text-white text-[10px] flex items-center justify-center border-2 border-white dark:border-neutral-800"
+                [ngClass]="iconOf(n).bg">
+            <i class="fa-solid" [ngClass]="iconOf(n).icon"></i>
+          </span>
+        </span>
+
         <div class="flex-1 min-w-0 text-sm">
-          <p><span class="font-semibold">{{ n.sender?.name }}</span> {{ text(n) }}</p>
-          <p class="text-xs text-gray-500">{{ n.createdAt | localizedDate: 'medium' }}</p>
+          <p class="leading-snug">
+                       <span class="font-semibold">{{ n.actor?.name }}</span>
+            {{ text(n) }}
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ n.createdAt | localizedDate: 'medium' }}</p>
         </div>
-        <span *ngIf="!n.isRead" class="mt-2 w-2.5 h-2.5 rounded-full bg-rose shrink-0"></span>
+
+        <span *ngIf="!n.isRead" class="mt-2 w-2.5 h-2.5 rounded-full bg-rose shrink-0" [attr.aria-label]="'Unread' | t"></span>
       </button>
     </li>
   </ul>

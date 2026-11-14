@@ -196,6 +196,11 @@ const arabicTranslations: Record<string, string> = {
   'Page not found': 'الصفحة غير موجودة',
   'The page you\'re looking for doesn\'t exist.': 'الصفحة التي تبحث عنها غير موجودة.',
   'Back to home': 'العودة للرئيسية',
+  '{n} unread': '{n} غير مقروء',
+  'All notifications marked as read': 'تم تعليم كل الإشعارات كمقروءة',
+  'No unread notifications': 'لا توجد إشعارات غير مقروءة',
+  'No notifications yet': 'لا توجد إشعارات بعد',
+  'When someone likes, comments or follows you, it will show up here.': 'عندما يعجب بك أحد أو يعلّق أو يتابعك سيظهر هنا.',
 };
 
 @Injectable({ providedIn: 'root' })

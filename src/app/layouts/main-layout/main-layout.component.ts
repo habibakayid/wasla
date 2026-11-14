@@ -22,6 +22,7 @@ import { SuggestionsComponent } from '@features/feed/components/suggestions/sugg
 export class MainLayoutComponent implements OnInit {
   profile = signal<any>(null); 
   recent = signal<any[]>([]); 
+  postsTotal = signal(0);
   collapsed = signal(false); 
   searchText = signal(''); 
   private search$ = new Subject<string>();
@@ -88,6 +89,17 @@ export class MainLayoutComponent implements OnInit {
     });
 
     this.notificationsService.refreshUnreadCount();
+    
+    
+    const me = this.auth.user();
+    if (me) {
+      this.usersService.getUserPosts(me._id, 1, 1).subscribe({
+        next: (res) => {
+          const pagination = res.meta && res.meta.pagination;
+          this.postsTotal.set(pagination ? pagination.total : (res.data.posts || []).length);
+        },
+      });
+    }
 
     this.notificationsService.getNotifications('false', 1, 4).subscribe({
       next: (res) => {

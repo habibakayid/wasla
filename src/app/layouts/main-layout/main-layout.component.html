@@ -33,7 +33,8 @@
          
           <div class="grid grid-cols-3 gap-2 text-center mt-4 pt-3 border-t border-gray-200 dark:border-neutral-700">
             <div>
-              <p class="font-bold">{{ profile()?.postsCount || 0 }}</p>
+              <!-- <p class="font-bold">{{ profile()?.postsCount || 0 }}</p> -->
+              <p class="font-bold">{{ postsTotal() }}</p>
               <p class="text-xs text-gray-500">{{ 'Posts' | t }}</p>
             </div>
             <div>
@@ -137,13 +138,12 @@
               <h2 class="font-semibold mb-3">{{ 'Recent Activity' | t }}</h2>
               <p *ngIf="recent().length === 0" class="text-sm text-gray-500">{{ 'No recent activity.' | t }}</p>
               <ul class="space-y-3">
-                <li *ngFor="let n of recent()" class="flex items-start gap-3">
-                 
-                  <a *ngIf="n.sender?.photo" [routerLink]="senderLink(n.sender)" class="shrink-0">
-                    <img [src]="n.sender.photo" alt="" class="w-8 h-8 rounded-full object-cover bg-brand" />
+                 <li *ngFor="let n of recent()" class="flex items-start gap-3">
+                  <a *ngIf="n.actor?.photo" [routerLink]="senderLink(n.actor)" class="shrink-0">
+                    <img [src]="n.actor.photo" alt="" class="w-8 h-8 rounded-full object-cover bg-brand" />
                   </a>
                   <div class="text-sm min-w-0">
-                    <p class="truncate">{{ n.message || n.type }}</p>
+                    <p class="truncate"><span class="font-semibold">{{ n.actor?.name }}</span> {{ notificationsService.describe(n) }}</p>
                     <p class="text-xs text-gray-500">{{ n.createdAt | localizedDate: 'short' }}</p>
                   </div>
                 </li>
